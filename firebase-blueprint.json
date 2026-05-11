@@ -1,0 +1,80 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Producto del Menú",
+      "description": "Un item disponible en la cafetería.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "available": { "type": "boolean" },
+        "hasMilkOptions": { "type": "boolean" },
+        "hasTemperatureOptions": { "type": "boolean" },
+        "imageUrl": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "price", "category", "available"]
+    },
+    "BlogPost": {
+      "title": "Entrada de Blog",
+      "description": "Historias y cultura sobre el café.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "summary": { "type": "string" },
+        "content": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "publishedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "content"]
+    },
+    "Reservation": {
+      "title": "Reserva de Espacio",
+      "description": "Reserva de mesa o barra para co-work.",
+      "type": "object",
+      "properties": {
+        "spotId": { "type": "string" },
+        "customerName": { "type": "string" },
+        "customerEmail": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "time": { "type": "string" },
+        "pax": { "type": "number" },
+        "notes": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["spotId", "date", "time"]
+    },
+    "Admin": {
+      "title": "Socio Administrador",
+      "description": "Usuario con permisos de gestión.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string" },
+        "role": { "type": "string" }
+      },
+      "required": ["email"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Lista de bebidas y snacks."
+    },
+    "/blogPosts/{postId}": {
+      "schema": "BlogPost",
+      "description": "Artículos de cultura de café."
+    },
+    "/reservations/{reservationId}": {
+      "schema": "Reservation",
+      "description": "Gestión de ocupación."
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Lista blanca de socios."
+    }
+  }
+}

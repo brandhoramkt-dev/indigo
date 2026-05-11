@@ -1,0 +1,58 @@
+import { motion } from "motion/react";
+import { ArrowRight, ShoppingCart } from "lucide-react";
+
+export default function Hero() {
+  return (
+    <section id="home" className="relative h-[95vh] flex items-center justify-center overflow-hidden bg-indigo-dark">
+      {/* Background with overlay */}
+      <div className="absolute inset-0 z-0">
+        <img 
+          src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop" 
+          alt="Coffee Shop Background" 
+          className="w-full h-full object-cover opacity-40"
+          referrerPolicy="no-referrer"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-indigo-dark/60 via-transparent to-indigo-dark"></div>
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
+        <motion.div
+           initial={{ opacity: 0, y: 30 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.8, ease: "easeOut" }}
+        >
+          <span className="text-yellow-brand font-sans font-bold uppercase tracking-[0.3em] text-sm mb-6 block">Tu espacio, tu ritmo</span>
+          <h1 className="text-white text-6xl md:text-8xl lg:text-9xl font-extenda font-black tracking-tighter leading-[0.85] mb-8 uppercase">
+            INDIGO <br />
+            <span className="text-transparent border-t-2 border-b-2 border-white/20 px-2 mt-2 inline-block italic font-editorial font-sans lowercase">Coffee</span>
+          </h1>
+          
+          <p className="text-white/70 max-w-xl mx-auto text-lg md:text-xl font-light mb-12 leading-relaxed">
+            Olvídate de las filas. Tu bebida favorita lista cuando tú quieras. Reserva tu mesa ideal para trabajar o charlar.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a 
+              href="#menu"
+              className="group bg-orange-brand hover:bg-white text-white hover:text-indigo-brand px-10 py-5 rounded-2xl font-bold transition-all shadow-2xl flex items-center gap-3 active:scale-95 w-full sm:w-auto"
+            >
+              ORDENAR AHORA
+              <ShoppingCart size={20} className="group-hover:translate-x-1 transition-transform" />
+            </a>
+            <a 
+              href="#reservas"
+              className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/30 px-10 py-5 rounded-2xl font-bold transition-all w-full sm:w-auto hover:border-white"
+            >
+              RESERVAR ESPACIO
+            </a>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Floating indicators */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 animate-bounce opacity-50">
+        <div className="w-0.5 h-12 bg-gradient-to-b from-white to-transparent"></div>
+      </div>
+    </section>
+  );
+}

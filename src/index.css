@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700;800;900&family=Archivo+Black&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Archivo Black", sans-serif;
+  --font-editorial: "Playfair Display", serif;
+
+  --color-indigo-brand: #2e3191;
+  --color-indigo-dark: #1a1b4b;
+  --color-orange-brand: #ef6a22;
+  --color-yellow-brand: #fdbc1b;
+  --color-bg-warm: #fdfbf7;
+}
+
+@layer base {
+  body {
+    @apply bg-bg-warm text-gray-900 font-sans antialiased selection:bg-orange-brand/20;
+  }
+}
+
+.font-extenda {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/20;
+}
+
