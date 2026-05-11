@@ -27,7 +27,7 @@ export default function Navbar({ cartCount, onOpenCart }: { cartCount: number, o
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-4 group">
           <img src="/icono.png" alt="Indigo Icon" className="h-10 object-contain" />
-          <img src="/logo.png" alt="Indigo Logo" className="h-6 object-contain hidden sm:block" />
+          <img src={isScrolled ? "/logo-H.png" : "/logo.png"} alt="Indigo Logo" className="h-6 object-contain hidden sm:block transition-all" />
         </Link>
 
         {/* Desktop Nav */}

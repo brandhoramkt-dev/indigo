@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, Routes, Route, useNavigate } from "react-router-dom";
+import { useFirestoreCollection } from "../lib/hooks";
 import { useAuth } from "../lib/AuthContext";
 import { 
   BarChart3, 
@@ -96,6 +97,13 @@ export default function AdminDashboard() {
 }
 
 function Overview() {
+  const { data: products } = useFirestoreCollection("products");
+  const { data: admins } = useFirestoreCollection("admins");
+  const { data: reservations } = useFirestoreCollection("reservations");
+
+  const today = new Date().toISOString().split('T')[0];
+  const todayReservations = reservations?.filter((r: any) => r.date === today) || [];
+
   return (
     <div className="space-y-12">
       <header className="flex justify-between items-end">
@@ -113,9 +121,9 @@ function Overview() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        <StatCard title="Reservas" value="12" icon={Calendar} trend="+2 hoy" />
-        <StatCard title="Productos" value="48" icon={Coffee} />
-        <StatCard title="Usuarios" value="4" icon={Users} />
+        <StatCard title="Reservas" value={reservations?.length.toString() || "0"} icon={Calendar} trend={`${todayReservations.length} hoy`} />
+        <StatCard title="Productos" value={products?.length.toString() || "0"} icon={Coffee} />
+        <StatCard title="Usuarios" value={admins?.length.toString() || "0"} icon={Users} />
       </div>
 
       <div className="grid grid-cols-1 gap-12">

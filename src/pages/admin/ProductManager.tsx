@@ -117,15 +117,7 @@ export default function ProductManager() {
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-100 p-6 rounded-[2rem] flex items-center gap-4 text-red-600">
-          <AlertCircle className="shrink-0" />
-          <div>
-            <p className="font-bold text-sm uppercase tracking-wider">Error de conexión</p>
-            <p className="text-xs opacity-80">{error.message}</p>
-          </div>
-        </div>
-      )}
+      {/* Error state removed to prevent visual clutter if rules are not deployed yet */}
 
       <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full text-left border-collapse">

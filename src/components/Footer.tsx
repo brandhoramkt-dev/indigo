@@ -53,18 +53,30 @@ export default function Footer() {
                 La Paz, Bolivia.<br />
                 <span className="text-orange-brand font-bold text-xs mt-2 inline-block">Ver en Google Maps →</span>
              </a>
-             <p className="text-white/60 text-sm font-sans mb-4">
+             <p className="text-white/60 text-sm font-sans mb-6">
                 <span className="block font-bold mb-1">WhatsApp:</span>
                 <a href="https://wa.me/59176966747" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">+591 76966747</a>
              </p>
+             <div className="w-full h-32 rounded-xl overflow-hidden border border-white/10 opacity-70 hover:opacity-100 transition-opacity">
+               <iframe 
+                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1154.512684813586!2d-68.0827179!3d-16.5398299!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x915f212268cd1df9%3A0x6b107eec52857e4e!2sIndigo%20Coffee%20Hub!5e0!3m2!1sen!2sbo!4v1715456789012!5m2!1sen!2sbo" 
+                 width="100%" 
+                 height="100%" 
+                 style={{ border: 0 }} 
+                 allowFullScreen={false} 
+                 loading="lazy" 
+                 referrerPolicy="no-referrer-when-downgrade"
+                 title="Indigo Coffee Hub Ubicación"
+               ></iframe>
+             </div>
           </div>
         </div>
 
         <div className="pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest font-bold text-white/20">
           <p>© 2026 Indigo Coffee. Todos los derechos reservados.</p>
           <div className="flex gap-8">
-            <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-            <a href="#" className="hover:text-white transition-colors">Términos</a>
+            <Link to="/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
+            <Link to="/terminos" className="hover:text-white transition-colors">Términos</Link>
           </div>
         </div>
       </div>
