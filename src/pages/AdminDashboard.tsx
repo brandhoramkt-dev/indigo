@@ -112,25 +112,13 @@ function Overview() {
       </header>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-        <StatCard title="Ventas Hoy" value="Bs 1,240" icon={TrendingUp} trend="+12%" />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <StatCard title="Reservas" value="12" icon={Calendar} trend="+2 hoy" />
         <StatCard title="Productos" value="48" icon={Coffee} />
         <StatCard title="Usuarios" value="4" icon={Users} />
       </div>
 
       <div className="grid grid-cols-1 gap-12">
-         {/* Camera Placeholder */}
-         <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm min-h-[400px] flex flex-col">
-            <h3 className="font-display font-black text-2xl text-indigo-brand uppercase mb-6">Cámara de Seguridad (Xiaomi)</h3>
-            <div className="flex-1 bg-gray-100 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-gray-300">
-               <span className="text-gray-400 font-bold uppercase tracking-widest text-sm mb-2">Señal no configurada</span>
-               <p className="text-gray-400 text-xs text-center max-w-sm px-4">
-                  Las cámaras Xiaomi generalmente requieren exportar la señal RTSP o visualizarse desde la app oficial. 
-                  Se necesita configuración adicional de red para embeber el video aquí.
-               </p>
-            </div>
-         </div>
 
          <div className="bg-indigo-brand rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
             <div className="relative z-10">

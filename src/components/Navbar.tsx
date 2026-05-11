@@ -26,10 +26,7 @@ export default function Navbar({ cartCount, onOpenCart }: { cartCount: number, o
     <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-white/90 backdrop-blur-md shadow-sm py-4" : "bg-transparent py-6"}`}>
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-10 h-10 bg-indigo-brand rounded-xl flex items-center justify-center text-white group-hover:rotate-12 transition-transform">
-            <Coffee size={24} />
-          </div>
-          <span className={`font-extenda font-black text-2xl tracking-tighter ${isScrolled ? "text-indigo-brand" : "text-white"}`}>INDIGO</span>
+          <img src="/logo.png" alt="Indigo Logo" className="h-6 object-contain" />
         </Link>
 
         {/* Desktop Nav */}

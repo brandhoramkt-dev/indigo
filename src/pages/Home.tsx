@@ -111,10 +111,9 @@ export default function Home() {
                 <div className="aspect-square bg-white/10 rounded-full flex items-center justify-center p-8 border border-white/20">
                    <div className="w-full h-full rounded-full overflow-hidden border-8 border-white/10">
                       <img 
-                        src="https://images.unsplash.com/photo-1517433367423-c7e5b0f35086?q=80&w=2048&auto=format&fit=crop" 
+                        src="/co-work-bolivia-lapaz.webp" 
                         alt="Cowork" 
                         className="w-full h-full object-cover"
-                        referrerPolicy="no-referrer"
                       />
                    </div>
                 </div>

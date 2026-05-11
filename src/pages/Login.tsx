@@ -48,7 +48,7 @@ export default function Login() {
               onClick={() => login('popup')}
               className="w-full group bg-indigo-brand hover:bg-orange-brand text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-4 transition-all shadow-xl shadow-indigo-brand/10 active:scale-95"
             >
-              ENTRAR CON GOOGLE (POPUP)
+              LOGIN
               <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
             </button>
 
@@ -56,12 +56,8 @@ export default function Login() {
               onClick={() => login('redirect')}
               className="w-full group bg-gray-100 hover:bg-gray-200 text-gray-700 py-4 rounded-2xl font-bold flex items-center justify-center gap-4 transition-all active:scale-95 text-sm"
             >
-              USAR REDIRECCIÓN (SI FALLA EL POPUP)
+              USAR REDIRECCIÓN (SI FALLA POPUP)
             </button>
-            
-            <p className="text-[10px] text-gray-400 text-center px-4 leading-tight">
-              Si la ventana se cierra sola, por favor haz clic en el icono de <span className="font-bold">"Abrir en pestaña nueva"</span> (arriba a la derecha) y vuelve a intentarlo.
-            </p>
           </div>
         )}
 

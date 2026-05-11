@@ -3,16 +3,14 @@ import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "
 import { db } from "../../lib/firebase";
 import { useFirestoreCollection } from "../../lib/hooks";
 import { Product, Category } from "../../types";
-import { Plus, Search, Filter, Edit2, Trash2, Check, X, AlertCircle, RefreshCw } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Check, X, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import Papa from "papaparse";
 
 export default function ProductManager() {
   const { data: products, loading, error } = useFirestoreCollection<Product>("products");
   const [searchTerm, setSearchTerm] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [isSyncing, setIsSyncing] = useState(false);
 
   // Form states
   const [name, setName] = useState("");
@@ -33,93 +31,7 @@ export default function ProductManager() {
     setEditingId(null);
   };
 
-  const handleGoogleSheetSync = async () => {
-    const sheetId = "2PACX-1vReXSCImufDgABqJD_4lE8EccnQEcEZu0NWZ8EHIyTOsZLaUCol6k8ti_uUzZB9ivP4QWGMyarwP7fH";
-    const url = `https://docs.google.com/spreadsheets/d/e/${sheetId}/pub?output=csv`;
-    
-    if (!confirm("Esto importará los productos de tu Google Sheet. ¿Continuar?")) return;
-
-    setIsSyncing(true);
-    try {
-      const response = await fetch(url);
-      const csvText = await response.text();
-      
-      Papa.parse(csvText, {
-        header: true,
-        skipEmptyLines: true,
-        complete: async (results) => {
-          const { writeBatch, collection, doc } = await import("firebase/firestore");
-          const batch = writeBatch(db);
-          let count = 0;
-
-          // Intentamos emparejar columnas comunes: Nombre, Categoria, Precio, Descripcion
-          results.data.forEach((row: any) => {
-            const pName = row.Nombre || row.Name || row.name || row.p_name;
-            let pPriceInput = row.Precio || row.Price || row.price || "0";
-            // Clean currency symbols if any
-            if (typeof pPriceInput === 'string') pPriceInput = pPriceInput.replace(/[^\d.,]/g, '');
-            const pPrice = parseFloat(pPriceInput);
-            
-            const rawCat = (row.Categoria || row.Category || row.category || "").toUpperCase().trim();
-            let pCat = Category.CLASSICS;
-
-            // Robust category matching
-            if (rawCat.includes("INFU")) pCat = Category.INFUSIONS;
-            else if (rawCat.includes("COOL") || rawCat.includes("FRID") || rawCat.includes("MATCH")) pCat = Category.COOL;
-            else if (rawCat.includes("SWEET") || rawCat.includes("POSTR") || rawCat.includes("DEBIL")) pCat = Category.SWEET;
-            else if (rawCat.includes("SAND") || rawCat.includes("SALAD")) pCat = Category.SANDWICHES;
-            else if (rawCat.includes("EXTRA")) pCat = Category.EXTRAS;
-            else if (rawCat.includes("CLÁS") || rawCat.includes("CLAS") || rawCat.includes("CAF")) pCat = Category.CLASSICS;
-
-            if (pName && !isNaN(pPrice)) {
-              // Check if product already exists to avoid massive duplication
-              const exists = products.find(p => p.name.toLowerCase() === pName.toLowerCase());
-              
-              if (exists) {
-                const docRef = doc(db, "products", exists.id);
-                batch.update(docRef, {
-                  price: pPrice,
-                  category: pCat,
-                  description: row.Descripcion || row.Description || row.description || exists.description || "",
-                  updatedAt: serverTimestamp()
-                });
-              } else {
-                const newDocRef = doc(collection(db, "products"));
-                batch.set(newDocRef, {
-                  name: pName,
-                  price: pPrice,
-                  category: pCat,
-                  description: row.Descripcion || row.Description || row.description || "",
-                  available: true,
-                  hasMilkOptions: false,
-                  hasTemperatureOptions: false,
-                  updatedAt: serverTimestamp()
-                });
-              }
-              count++;
-            }
-          });
-
-          if (count > 0) {
-            await batch.commit();
-            alert(`¡Éxito! Se han importado ${count} productos desde tu hoja de cálculo.`);
-          } else {
-            alert("No se encontraron datos válidos en la hoja. Verifica que las columnas tengan nombres como 'Nombre', 'Precio', 'Categoria'.");
-          }
-          setIsSyncing(false);
-        },
-        error: (error: any) => {
-          console.error(error);
-          alert("Error al procesar el archivo CSV.");
-          setIsSyncing(false);
-        }
-      });
-    } catch (err) {
-      console.error(err);
-      alert("Error al conectar con Google Sheets. Asegúrate de que el documento esté 'Publicado en la Web'.");
-      setIsSyncing(false);
-    }
-  };
+  // Removed handleGoogleSheetSync
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -172,41 +84,7 @@ export default function ProductManager() {
 
   const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const handleSeedData = async () => {
-    const initialProducts = [
-      { name: "Power Master (M)", price: 10, category: Category.CLASSICS, available: true, hasTemperatureOptions: true, description: "Preparado en Moccamaster. La dosis de cafeína más alta de la barra." },
-      { name: "Power Master (G)", price: 15, category: Category.CLASSICS, available: true, hasTemperatureOptions: true, description: "Doble carga de energía para días largos." },
-      { name: "Espresso", price: 12, category: Category.CLASSICS, available: true, description: "La esencia del grano. Intenso y cremoso." },
-      { name: "Americano", price: 15, category: Category.CLASSICS, available: true, hasTemperatureOptions: true, description: "Espresso diluido en agua caliente. Ligero, pero sin perder presencia." },
-      { name: "Cappuccino", price: 18, category: Category.CLASSICS, available: true, hasMilkOptions: true, description: "Equilibrio exacto de espresso, leche y espuma densa." },
-      { name: "Latte", price: 22, category: Category.CLASSICS, available: true, hasMilkOptions: true, hasTemperatureOptions: true, description: "Más leche, menos espuma. Cremoso, suave y reconfortante." },
-      { name: "Jengibre, Miel & Limón", price: 18, category: Category.INFUSIONS, available: true, hasTemperatureOptions: true, description: "Notas cítricas y especiadas. Energía cálida." },
-      { name: "Infusión Clásica", price: 18, category: Category.INFUSIONS, available: true, hasTemperatureOptions: true, description: "Aromas familiares para la energía o la digestión." },
-      { name: "Strawberry Matcha", price: 28, category: Category.COOL, available: true, hasMilkOptions: true, hasTemperatureOptions: true, description: "Matcha ceremonial con leche sobre fondo de jarabe de frutilla." },
-      { name: "Mocaccino", price: 22, category: Category.COOL, available: true, hasMilkOptions: true, hasTemperatureOptions: true, description: "La unión de espresso, cacao y leche." },
-      { name: "Pan de Chocolate", price: 12, category: Category.SWEET, available: true, description: "Hojaldre mantecoso relleno de cacao oscuro." },
-      { name: "Croissant", price: 12, category: Category.SWEET, available: true, description: "Dorado, aireado y crujiente." },
-      { name: "Jamón y queso", price: 18, category: Category.SANDWICHES, available: true, description: "Pan de molde, jamón y queso con doble mantequilla." },
-      { name: "Shot Extra", price: 3, category: Category.EXTRAS, available: true, description: "Más potencia para tu café." }
-    ];
-
-    try {
-      const { writeBatch, collection, doc } = await import("firebase/firestore");
-      const batch = writeBatch(db);
-      
-      initialProducts.forEach(p => {
-        const newDocRef = doc(collection(db, "products"));
-        batch.set(newDocRef, { ...p, updatedAt: serverTimestamp() });
-      });
-
-      await batch.commit();
-      alert("¡Menú profesional cargado con éxito de forma atómica!");
-    } catch (err: any) {
-      console.error("Seed error:", err);
-      const msg = err.code ? `${err.code}: ${err.message}` : (err.message || String(err));
-      alert("Error al cargar los datos: " + msg);
-    }
-  };
+  // Removed handleSeedData
 
   return (
     <div className="space-y-8">
@@ -216,21 +94,6 @@ export default function ProductManager() {
            <p className="text-gray-400 mt-1 font-medium font-sans">Gestiona los productos disponibles para tus clientes.</p>
         </div>
         <div className="flex gap-4">
-           <button 
-             onClick={handleGoogleSheetSync}
-             disabled={isSyncing}
-             className="bg-indigo-50 text-indigo-brand font-bold px-6 py-4 rounded-2xl text-xs tracking-widest hover:bg-indigo-100 transition-all flex items-center gap-2 disabled:opacity-50"
-           >
-             {isSyncing ? "SINCRONIZANDO..." : "GOOGLE SHEETS"} <RefreshCw size={16} className={isSyncing ? "animate-spin" : ""} />
-           </button>
-           {products.length === 0 && (
-             <button 
-               onClick={handleSeedData}
-               className="bg-yellow-brand text-indigo-brand font-bold px-6 py-4 rounded-2xl text-xs tracking-widest hover:scale-105 transition-transform"
-             >
-               CARGAR INICIAL
-             </button>
-           )}
            <button 
              onClick={() => setIsAdding(true)} 
              className="bg-indigo-brand hover:bg-orange-brand text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-brand/10 flex items-center gap-3 text-xs tracking-widest active:scale-95"

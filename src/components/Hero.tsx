@@ -7,10 +7,9 @@ export default function Hero() {
       {/* Background with overlay */}
       <div className="absolute inset-0 z-0">
         <img 
-          src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop" 
-          alt="Coffee Shop Background" 
-          className="w-full h-full object-cover opacity-40"
-          referrerPolicy="no-referrer"
+          src="/cafeteria-co-work-bolivia-indigo.webp" 
+          alt="Indigo Coffee Shop Background" 
+          className="w-full h-full object-cover opacity-50"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-indigo-dark/60 via-transparent to-indigo-dark"></div>
       </div>
@@ -22,9 +21,9 @@ export default function Hero() {
            transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <span className="text-yellow-brand font-sans font-bold uppercase tracking-[0.3em] text-sm mb-6 block">Tu espacio, tu ritmo</span>
-          <h1 className="text-white text-6xl md:text-8xl lg:text-9xl font-extenda font-black tracking-tighter leading-[0.85] mb-8 uppercase">
-            INDIGO <br />
-            <span className="text-transparent border-t-2 border-b-2 border-white/20 px-2 mt-2 inline-block italic font-editorial font-sans lowercase">Coffee</span>
+          <h1 className="flex flex-col items-center justify-center mb-8">
+            <img src="/logo.png" alt="Indigo Coffee Logo" className="h-20 md:h-28 lg:h-36 object-contain mb-2" />
+            <span className="text-white border-t-2 border-b-2 border-white/20 px-4 py-1 mt-2 inline-block italic font-editorial font-sans lowercase text-4xl md:text-5xl">Coffee</span>
           </h1>
           
           <p className="text-white/70 max-w-xl mx-auto text-lg md:text-xl font-light mb-12 leading-relaxed">
