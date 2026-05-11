@@ -11,7 +11,7 @@ service cloud.firestore {
     function isAdmin() { 
       return isSignedIn() && (
         request.auth.token.email == "brandhoramkt@gmail.com" ||
-        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        exists(/databases/$(database)/documents/admins/$(request.auth.token.email))
       ); 
     }
     function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
@@ -41,9 +41,9 @@ service cloud.firestore {
     }
 
     // 4. Admins (Lista Blanca)
-    match /admins/{adminId} {
+    match /admins/{adminEmail} {
       allow read: if isSignedIn();
-      allow write: if false;
+      allow write: if isAdmin();
     }
 
     // --- Validation Helpers (Blueprints) ---

@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from "motion/react";
 export default function Navbar({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: () => void }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -46,15 +46,6 @@ export default function Navbar({ cartCount, onOpenCart }: { cartCount: number, o
           ))}
           
           <div className="flex items-center gap-4 ml-4">
-            {isAdmin ? (
-              <Link to="/admin" className="text-[10px] font-black bg-yellow-brand text-indigo-brand px-4 py-2 rounded-xl hover:bg-orange-brand hover:text-white transition-all tracking-[0.2em] uppercase">
-                Panel Socio
-              </Link>
-            ) : !user ? (
-              <Link to="/login" className={`text-[10px] font-black px-4 py-2 rounded-xl border transition-all tracking-[0.2em] uppercase ${isScrolled ? "border-indigo-brand text-indigo-brand hover:bg-indigo-brand hover:text-white" : "border-white/30 text-white hover:bg-white hover:text-indigo-brand"}`}>
-                Socio
-              </Link>
-            ) : null}
             <button 
               onClick={onOpenCart}
               className={`relative p-2 rounded-full transition-colors ${isScrolled ? "bg-gray-100 text-gray-600 hover:bg-indigo-50" : "bg-white/10 text-white hover:bg-white/20"}`}
@@ -97,10 +88,7 @@ export default function Navbar({ cartCount, onOpenCart }: { cartCount: number, o
                 {link.name}
               </a>
             ))}
-            <div className="pt-6 border-t border-gray-100 flex items-center justify-between">
-               {isAdmin && (
-                  <Link to="/admin" className="text-sm font-bold text-indigo-brand">PANEL SOCIO</Link>
-               )}
+            <div className="pt-6 border-t border-gray-100 flex items-center justify-end">
                <button 
                  onClick={() => { setIsMobileMenuOpen(false); onOpenCart(); }}
                  className="flex items-center gap-2 text-indigo-brand font-bold"

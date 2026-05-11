@@ -18,6 +18,7 @@ import {
 import ProductManager from "./admin/ProductManager";
 import BlogManager from "./admin/BlogManager";
 import ReservationViewer from "./admin/ReservationViewer";
+import TeamManager from "./admin/TeamManager";
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -87,7 +88,7 @@ export default function AdminDashboard() {
           <Route path="/products" element={<ProductManager />} />
           <Route path="/blog" element={<BlogManager />} />
           <Route path="/reservations" element={<ReservationViewer />} />
-          <Route path="/team" element={<div className="bg-white rounded-3xl p-12 border border-gray-100"><h2 className="text-4xl font-display font-black text-indigo-brand mb-4">Gestión de Socios</h2><p className="text-gray-400">Pronto disponible.</p></div>} />
+          <Route path="/team" element={<TeamManager />} />
         </Routes>
       </main>
     </div>
@@ -118,25 +119,16 @@ function Overview() {
         <StatCard title="Usuarios" value="4" icon={Users} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-         <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm">
-            <div className="flex justify-between items-center mb-10">
-               <h3 className="font-display font-black text-2xl text-indigo-brand uppercase">Actividad Reciente</h3>
-               <button className="text-indigo-brand font-bold text-xs uppercase tracking-widest hover:underline">Ver Todo</button>
-            </div>
-            <div className="space-y-8">
-               {[1, 2, 3].map(i => (
-                 <div key={i} className="flex gap-6 items-start">
-                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center flex-shrink-0">
-                       <Clock size={20} className="text-gray-300" />
-                    </div>
-                    <div>
-                       <p className="text-sm font-bold text-indigo-brand uppercase mb-1">Nueva Reserva: Mesa 04</p>
-                       <p className="text-xs text-gray-400">Hace 15 minutos • Por Carlos Mendoza</p>
-                    </div>
-                    <ChevronRight size={16} className="ml-auto text-gray-200" />
-                 </div>
-               ))}
+      <div className="grid grid-cols-1 gap-12">
+         {/* Camera Placeholder */}
+         <div className="bg-white rounded-[2.5rem] p-10 border border-gray-100 shadow-sm min-h-[400px] flex flex-col">
+            <h3 className="font-display font-black text-2xl text-indigo-brand uppercase mb-6">Cámara de Seguridad (Xiaomi)</h3>
+            <div className="flex-1 bg-gray-100 rounded-2xl flex flex-col items-center justify-center border-2 border-dashed border-gray-300">
+               <span className="text-gray-400 font-bold uppercase tracking-widest text-sm mb-2">Señal no configurada</span>
+               <p className="text-gray-400 text-xs text-center max-w-sm px-4">
+                  Las cámaras Xiaomi generalmente requieren exportar la señal RTSP o visualizarse desde la app oficial. 
+                  Se necesita configuración adicional de red para embeber el video aquí.
+               </p>
             </div>
          </div>
 

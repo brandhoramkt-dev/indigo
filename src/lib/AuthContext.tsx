@@ -45,14 +45,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Special bypass for the main partner
         if (user.email === "brandhoramkt@gmail.com") {
           setIsAdmin(true);
-        } else {
+        } else if (user.email) {
           try {
-            const adminDoc = await getDoc(doc(db, "admins", user.uid));
+            const adminDoc = await getDoc(doc(db, "admins", user.email));
             setIsAdmin(adminDoc.exists());
           } catch (e) {
             console.error("Admin check failed:", e);
             setIsAdmin(false);
           }
+        } else {
+          setIsAdmin(false);
         }
       } else {
         setIsAdmin(false);
