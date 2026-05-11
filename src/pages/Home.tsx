@@ -109,8 +109,8 @@ export default function Home() {
                viewport={{ once: true }}
                className="relative"
              >
-                 <div className="bg-white/10 rounded-3xl flex items-center justify-center p-8 border border-white/20 shadow-2xl">
-                    <div className="w-full h-full rounded-2xl overflow-hidden border-8 border-white/10">
+                 <div className="bg-white/10 rounded-3xl flex items-center justify-center p-4 border border-white/20 shadow-2xl">
+                    <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-white/10">
                        <img 
                          src="/co-work-bolivia-lapaz.webp" 
                          alt="Cowork" 

@@ -23,7 +23,7 @@ export default function Hero({ onOpenImageMenu }: { onOpenImageMenu?: () => void
           <span className="text-yellow-brand font-sans font-bold uppercase tracking-[0.3em] text-sm mb-6 block">Tu espacio, tu ritmo</span>
           <h1 className="flex flex-col items-center justify-center mb-8">
             <img src="/logo.png" alt="Indigo Coffee Logo" className="h-20 md:h-28 lg:h-36 object-contain mb-2" />
-            <span className="text-white border-t-2 border-b-2 border-white/20 px-4 py-1 mt-2 inline-block italic font-editorial font-sans lowercase text-4xl md:text-5xl">Coffee</span>
+            <span className="text-white font-bold border-t-2 border-b-2 border-white/20 px-4 py-1 mt-2 inline-block font-sans uppercase text-4xl md:text-5xl tracking-widest">COFFEE</span>
           </h1>
           
           <p className="text-white/70 max-w-xl mx-auto text-lg md:text-xl font-light mb-12 leading-relaxed">
