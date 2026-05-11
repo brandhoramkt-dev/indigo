@@ -5,7 +5,7 @@ export default function Footer() {
   return (
     <footer className="bg-indigo-dark text-white pt-24 pb-12 px-6">
       <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-16 mb-20">
           <div className="lg:col-span-1">
             <div className="flex items-center gap-2 mb-8">
               <div className="w-8 h-8 bg-orange-brand rounded-lg flex items-center justify-center text-white">
@@ -29,14 +29,7 @@ export default function Footer() {
             </div>
           </div>
           
-          <div>
-            <h4 className="font-extenda font-bold uppercase tracking-widest text-xs text-yellow-brand mb-8">Navegación</h4>
-            <ul className="space-y-4 font-sans">
-              {["Inicio", "Menú", "Reservas", "Cultura", "Contacto"].map(item => (
-                <li key={item}><a href={`#${item.toLowerCase()}`} className="text-white/60 hover:text-white transition-colors text-sm">{item}</a></li>
-              ))}
-            </ul>
-          </div>
+
           
           <div>
              <h4 className="font-extenda font-bold uppercase tracking-widest text-xs text-yellow-brand mb-8">Horarios</h4>
