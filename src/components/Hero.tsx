@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { ArrowRight, ShoppingCart } from "lucide-react";
 
-export default function Hero() {
+export default function Hero({ onOpenImageMenu }: { onOpenImageMenu?: () => void }) {
   return (
     <section id="home" className="relative h-[95vh] flex items-center justify-center overflow-hidden bg-indigo-dark">
       {/* Background with overlay */}
@@ -30,19 +30,25 @@ export default function Hero() {
             Olvídate de las filas. Tu bebida favorita lista cuando tú quieras. Reserva tu mesa ideal para trabajar o charlar.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
             <a 
               href="#menu"
-              className="group bg-orange-brand hover:bg-white text-white hover:text-indigo-brand px-10 py-5 rounded-2xl font-bold transition-all shadow-2xl flex items-center gap-3 active:scale-95 w-full sm:w-auto"
+              className="group bg-orange-brand hover:bg-white text-white hover:text-indigo-brand px-8 py-4 rounded-2xl font-bold transition-all shadow-2xl flex items-center gap-3 active:scale-95 w-full sm:w-auto text-sm"
             >
-              ORDENAR AHORA
-              <ShoppingCart size={20} className="group-hover:translate-x-1 transition-transform" />
+              ORDENAR
+              <ShoppingCart size={18} className="group-hover:translate-x-1 transition-transform" />
             </a>
+            <button 
+              onClick={onOpenImageMenu}
+              className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/30 px-8 py-4 rounded-2xl font-bold transition-all w-full sm:w-auto hover:border-white text-sm"
+            >
+              VER MENÚ
+            </button>
             <a 
               href="#reservas"
-              className="bg-white/10 hover:bg-white/20 text-white backdrop-blur-md border border-white/30 px-10 py-5 rounded-2xl font-bold transition-all w-full sm:w-auto hover:border-white"
+              className="bg-indigo-brand/80 hover:bg-indigo-brand text-white backdrop-blur-md px-8 py-4 rounded-2xl font-bold transition-all w-full sm:w-auto text-sm"
             >
-              RESERVAR ESPACIO
+              RESERVAR
             </a>
           </div>
         </motion.div>

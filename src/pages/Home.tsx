@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "motion/react";
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isImageMenuOpen, setIsImageMenuOpen] = useState(false);
 
   // Load cart from local storage
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function Home() {
       <Navbar cartCount={cart.length} onOpenCart={() => setIsCartOpen(true)} />
       
       <main>
-        <Hero />
+        <Hero onOpenImageMenu={() => setIsImageMenuOpen(true)} />
         
         {/* Reservation Quick Hook */}
         <section id="reservas" className="py-24 bg-indigo-brand text-white overflow-hidden">
@@ -108,19 +109,15 @@ export default function Home() {
                viewport={{ once: true }}
                className="relative"
              >
-                <div className="aspect-square bg-white/10 rounded-full flex items-center justify-center p-8 border border-white/20">
-                   <div className="w-full h-full rounded-full overflow-hidden border-8 border-white/10">
-                      <img 
-                        src="/co-work-bolivia-lapaz.webp" 
-                        alt="Cowork" 
-                        className="w-full h-full object-cover"
-                      />
-                   </div>
-                </div>
-                <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-orange-brand rounded-3xl p-6 flex flex-col justify-end shadow-2xl rotate-12">
-                   <span className="text-white font-extenda font-black text-5xl block">100%</span>
-                   <span className="text-white/80 font-bold text-xs uppercase tracking-widest">Enfoque</span>
-                </div>
+                 <div className="bg-white/10 rounded-3xl flex items-center justify-center p-8 border border-white/20 shadow-2xl">
+                    <div className="w-full h-full rounded-2xl overflow-hidden border-8 border-white/10">
+                       <img 
+                         src="/co-work-bolivia-lapaz.webp" 
+                         alt="Cowork" 
+                         className="w-full h-full object-cover"
+                       />
+                    </div>
+                 </div>
              </motion.div>
           </div>
         </section>
@@ -225,11 +222,21 @@ export default function Home() {
               </div>
 
               <div className="p-8 bg-gray-50 border-t border-gray-100">
-                <div className="flex justify-between items-end mb-8">
+                <div className="flex justify-between items-end mb-6">
                    <span className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">Subtotal a Pagar</span>
                    <span className="font-sans font-black text-5xl text-indigo-brand">Bs {total.toFixed(2)}</span>
                 </div>
                 
+                {cart.length > 0 && (
+                  <div className="mb-6 bg-white p-6 rounded-2xl border border-gray-100 flex flex-col items-center text-center shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-brand mb-4">Escanea para pagar</p>
+                    <img src="/indigo-qr-yape.png" alt="QR Yape" className="w-32 h-32 object-contain mb-4 rounded-xl border border-gray-100 p-2" />
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
+                      Escanea el QR para pagar tu orden.<br/>Luego presiona enviar a WhatsApp con tu comprobante.
+                    </p>
+                  </div>
+                )}
+
                 <button 
                   onClick={() => sendOrder("whatsapp")}
                   disabled={cart.length === 0}
@@ -243,6 +250,36 @@ export default function Home() {
                 >
                   Vaciar Carrito
                 </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Image Menu Modal */}
+      <AnimatePresence>
+        {isImageMenuOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsImageMenuOpen(false)}
+              className="fixed inset-0 bg-indigo-dark/95 backdrop-blur-md z-[80] overflow-y-auto"
+            >
+              <div className="min-h-screen p-6 md:p-12 flex flex-col items-center justify-start relative">
+                 <button 
+                   onClick={() => setIsImageMenuOpen(false)}
+                   className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-orange-brand text-white rounded-full transition-all"
+                 >
+                   <X size={24} />
+                 </button>
+                 
+                 <div className="max-w-2xl w-full flex flex-col gap-8 mt-16 md:mt-8 pb-24">
+                   <h2 className="text-4xl md:text-5xl font-extenda font-black text-white text-center tracking-tighter uppercase mb-4">NUESTRO <span className="text-orange-brand">MENÚ</span></h2>
+                   <img src="/menuanv.png" alt="Menu Anverso" className="w-full rounded-2xl shadow-2xl border-4 border-white/10" />
+                   <img src="/menurev.png" alt="Menu Reverso" className="w-full rounded-2xl shadow-2xl border-4 border-white/10" />
+                 </div>
               </div>
             </motion.div>
           </>
