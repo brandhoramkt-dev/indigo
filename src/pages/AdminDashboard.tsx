@@ -14,8 +14,11 @@ import {
   ChevronRight,
   TrendingUp,
   Clock,
-  LayoutDashboard
+  LayoutDashboard,
+  Menu,
+  X
 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import ProductManager from "./admin/ProductManager";
 import BlogManager from "./admin/BlogManager";
 import ReservationViewer from "./admin/ReservationViewer";
@@ -24,6 +27,8 @@ import TeamManager from "./admin/TeamManager";
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -39,15 +44,48 @@ export default function AdminDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+      {/* Mobile Header */}
+      <header className="md:hidden bg-indigo-dark text-white p-4 flex justify-between items-center sticky top-0 z-[60] border-b border-white/10">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-orange-brand rounded-lg flex items-center justify-center">
+            <Coffee size={18} />
+          </div>
+          <span className="font-display font-black text-lg tracking-tighter uppercase">INDIGO</span>
+        </div>
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+        >
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </header>
+
+      {/* Sidebar Overlay (Mobile) */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSidebarOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[50] md:hidden"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Sidebar */}
-      <aside className="w-72 bg-indigo-dark text-white flex flex-col sticky top-0 h-screen">
+      <aside className={`
+        fixed inset-y-0 left-0 z-[55] w-72 bg-indigo-dark text-white flex flex-col transition-transform duration-300 ease-in-out
+        ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
+        md:relative md:translate-x-0 md:sticky md:top-0 md:h-screen
+      `}>
         <div className="p-8 pb-12">
-          <div className="flex items-center gap-3 mb-12">
+          <div className="hidden md:flex items-center gap-3 mb-12">
              <div className="w-10 h-10 bg-orange-brand rounded-xl flex items-center justify-center">
                 <Coffee size={24} />
              </div>
-             <span className="font-display font-black text-xl tracking-tighter">INDIGO <span className="text-orange-brand">OPS</span></span>
+             <span className="font-display font-black text-xl tracking-tighter uppercase">INDIGO <span className="text-orange-brand">OPS</span></span>
           </div>
 
           <nav className="space-y-2">
@@ -55,6 +93,7 @@ export default function AdminDashboard() {
               <Link
                 key={item.name}
                 to={item.path}
+                onClick={() => setIsSidebarOpen(false)}
                 className="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/10 transition-colors group text-sm font-bold uppercase tracking-widest text-white/60 hover:text-white"
               >
                 <item.icon size={18} className="text-orange-brand group-hover:scale-110 transition-transform" />
@@ -69,7 +108,7 @@ export default function AdminDashboard() {
              <img src={user?.photoURL || ""} alt="User" className="w-10 h-10 rounded-full border border-white/20" />
              <div className="overflow-hidden">
                 <p className="text-xs font-bold truncate">{user?.displayName}</p>
-                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Socio Principal</p>
+                <p className="text-[10px] text-white/40 uppercase font-black tracking-widest">Administrador</p>
              </div>
           </div>
           <button 
@@ -82,7 +121,7 @@ export default function AdminDashboard() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-12 overflow-y-auto">
+      <main className="flex-1 p-6 md:p-12 overflow-y-auto">
         <Routes>
           <Route path="/" element={<Overview />} />
           <Route path="/dashboard" element={<Overview />} />

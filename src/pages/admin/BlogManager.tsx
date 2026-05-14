@@ -46,15 +46,15 @@ export default function BlogManager() {
   };
 
   return (
-    <div className="space-y-8">
-      <header className="flex justify-between items-center">
+    <div className="space-y-8 pb-12">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-           <h1 className="text-4xl font-display font-black text-indigo-brand tracking-tighter uppercase">Gestión de <span className="text-orange-brand">Cultura</span></h1>
-           <p className="text-gray-400 mt-1 font-medium">Comparte historias y conecta con tu comunidad.</p>
+           <h1 className="text-3xl md:text-4xl font-display font-black text-indigo-brand tracking-tighter uppercase">Gestión de <span className="text-orange-brand">Cultura</span></h1>
+           <p className="text-gray-400 mt-1 font-medium text-sm">Comparte historias y conecta con tu comunidad.</p>
         </div>
         <button 
           onClick={() => setIsAdding(true)} 
-          className="bg-indigo-brand hover:bg-orange-brand text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-brand/10 flex items-center gap-3 text-xs tracking-widest"
+          className="w-full md:w-auto bg-indigo-brand hover:bg-orange-brand text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-brand/10 flex items-center justify-center gap-3 text-xs tracking-widest"
         >
           NUEVA HISTORIA <Plus size={18} />
         </button>

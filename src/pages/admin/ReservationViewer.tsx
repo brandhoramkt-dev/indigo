@@ -12,10 +12,10 @@ export default function ReservationViewer() {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12">
       <header>
-        <h1 className="text-4xl font-display font-black text-indigo-brand tracking-tighter uppercase">Visor de <span className="text-orange-brand">Reservas</span></h1>
-        <p className="text-gray-400 mt-1 font-medium">Controla la ocupación de tus espacios en tiempo real.</p>
+        <h1 className="text-3xl md:text-4xl font-display font-black text-indigo-brand tracking-tighter uppercase">Visor de <span className="text-orange-brand">Reservas</span></h1>
+        <p className="text-gray-400 mt-1 font-medium text-sm">Controla la ocupación de tus espacios en tiempo real.</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

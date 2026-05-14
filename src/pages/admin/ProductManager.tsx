@@ -88,19 +88,17 @@ export default function ProductManager() {
 
   return (
     <div className="space-y-8">
-      <header className="flex justify-between items-center">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-           <h1 className="text-4xl font-extenda font-black text-indigo-brand tracking-tighter uppercase">Gestión de <span className="text-orange-brand">Menú</span></h1>
-           <p className="text-gray-400 mt-1 font-medium font-sans">Gestiona los productos disponibles para tus clientes.</p>
+           <h1 className="text-3xl md:text-4xl font-extenda font-black text-indigo-brand tracking-tighter uppercase">Gestión de <span className="text-orange-brand">Menú</span></h1>
+           <p className="text-gray-400 mt-1 font-medium font-sans text-sm">Gestiona los productos disponibles para tus clientes.</p>
         </div>
-        <div className="flex gap-4">
-           <button 
-             onClick={() => setIsAdding(true)} 
-             className="bg-indigo-brand hover:bg-orange-brand text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-brand/10 flex items-center gap-3 text-xs tracking-widest active:scale-95"
-           >
-             NUEVO PRODUCTO <Plus size={18} />
-           </button>
-        </div>
+        <button 
+          onClick={() => setIsAdding(true)} 
+          className="w-full md:w-auto bg-indigo-brand hover:bg-orange-brand text-white font-bold px-8 py-4 rounded-2xl transition-all shadow-xl shadow-indigo-brand/10 flex items-center justify-center gap-3 text-xs tracking-widest active:scale-95"
+        >
+          NUEVO PRODUCTO <Plus size={18} />
+        </button>
       </header>
 
       {/* Filters & Search */}
@@ -117,9 +115,39 @@ export default function ProductManager() {
         </div>
       </div>
 
-      {/* Error state removed to prevent visual clutter if rules are not deployed yet */}
+      {/* Mobile Card View */}
+      <div className="grid grid-cols-1 gap-4 md:hidden">
+        {filtered.map((p) => (
+          <div key={p.id} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm space-y-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest block mb-1">{p.category}</span>
+                <h3 className="font-bold text-indigo-brand uppercase">{p.name}</h3>
+              </div>
+              <p className="font-extenda font-black text-xl text-indigo-brand">Bs {p.price}</p>
+            </div>
+            
+            <p className="text-xs text-gray-500 line-clamp-2">{p.description}</p>
+            
+            <div className="flex items-center justify-between pt-2">
+              <button 
+                onClick={() => toggleAvailability(p.id, p.available)}
+                className={`px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest border transition-all ${p.available ? "bg-green-50 text-green-600 border-green-200" : "bg-red-50 text-red-600 border-red-200"}`}
+              >
+                {p.available ? "Disponible" : "Agotado"}
+              </button>
+              
+              <div className="flex gap-2">
+                <button onClick={() => startEdit(p)} className="p-3 bg-gray-50 text-indigo-brand rounded-xl hover:bg-indigo-brand hover:text-white transition-all"><Edit2 size={18} /></button>
+                <button onClick={() => handleDelete(p.id)} className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all"><Trash2 size={18} /></button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
-      <div className="bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
+      {/* Desktop Table View */}
+      <div className="hidden md:block bg-white rounded-[2.5rem] border border-gray-100 shadow-sm overflow-hidden">
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-gray-50 bg-gray-50/50">
@@ -155,14 +183,13 @@ export default function ProductManager() {
                 </td>
               </tr>
             ))}
-            {filtered.length === 0 && !loading && (
-              <tr>
-                <td colSpan={5} className="px-8 py-20 text-center text-gray-400 uppercase font-black tracking-widest text-xs">No se encontraron productos</td>
-              </tr>
-            )}
           </tbody>
         </table>
       </div>
+      
+      {filtered.length === 0 && !loading && (
+        <div className="py-20 text-center text-gray-400 uppercase font-black tracking-widest text-xs">No se encontraron productos</div>
+      )}
 
       {/* Modal / Form Overlay */}
       <AnimatePresence>
