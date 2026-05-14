@@ -1,10 +1,9 @@
 {
-  "projectId": "indigosistema-7c45d",
-  "appId": "1:747151289102:web:b8cb6236a8c8cdbf0f455f",
-  "apiKey": "AIzaSyAUzKvOmNXHoWMR7dUKifyWehyDEszT2nA",
-  "authDomain": "indigosistema-7c45d.firebaseapp.com",
-  "firestoreDatabaseId": "cafe-web-db-1",
-  "storageBucket": "indigosistema-7c45d.firebasestorage.app",
-  "messagingSenderId": "747151289102",
+  "projectId": "indigweb",
+  "appId": "1:890078881479:web:b4fcb028ff796286c280e2",
+  "apiKey": "AIzaSyAp9RIr0xB1hvK_PAVBR_-qn5EtQykSOco",
+  "authDomain": "indigweb.firebaseapp.com",
+  "storageBucket": "indigweb.firebasestorage.app",
+  "messagingSenderId": "890078881479",
   "measurementId": ""
 }
