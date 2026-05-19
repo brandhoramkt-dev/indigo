@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useFirestoreCollection } from "../lib/hooks";
 import { Product, Category, CartItem } from "../types";
 import { motion, AnimatePresence } from "motion/react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import { Plus, Minus, Info } from "lucide-react";
 
 export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartItem) => void }) {
@@ -10,6 +12,19 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
+  const [menuOptions, setMenuOptions] = useState<{milks: string[], essences: string[]}>({
+    milks: ["Entera", "Deslactosada", "Almendra", "Avena"],
+    essences: ["Sin Esencia", "Vainilla", "Caramelo", "Avellana"]
+  });
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, "settings", "menuOptions"), (docSnap) => {
+      if (docSnap.exists()) {
+        setMenuOptions(docSnap.data() as any);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Auto-select first category that has products if current one is empty (only on first load)
   useEffect(() => {
@@ -78,7 +93,7 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
         >
           <AnimatePresence>
             {filteredProducts.map((p) => (
-              <ProductCard key={p.id} product={p} onAdd={onAddToCart} />
+              <ProductCard key={p.id} product={p} onAdd={onAddToCart} menuOptions={menuOptions} />
             ))}
           </AnimatePresence>
           {filteredProducts.length === 0 && (
@@ -101,14 +116,13 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
 
 interface ProductCardProps {
   product: Product;
-  onAdd: (item: CartItem) => void;
-  key?: string | number;
+  menuOptions: { milks: string[], essences: string[] };
 }
 
-function ProductCard({ product, onAdd }: ProductCardProps) {
+function ProductCard({ product, onAdd, menuOptions }: ProductCardProps) {
   const [temp, setTemp] = useState<"Caliente" | "Frío">("Caliente");
   const [essence, setEssence] = useState<string>("");
-  const essencesList = ["Sin Esencia", "Vainilla", "Caramelo", "Avellana", "Amaretto"];
+  const [milk, setMilk] = useState<string>("");
 
   return (
     <motion.div
@@ -120,7 +134,7 @@ function ProductCard({ product, onAdd }: ProductCardProps) {
     >
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="font-extenda font-black text-2xl md:text-3xl text-indigo-brand group-hover:text-orange-brand transition-colors leading-none mb-2 uppercase">{product.name}</h3>
+          <h3 className="font-extenda font-black text-xl md:text-2xl text-indigo-brand group-hover:text-orange-brand transition-colors leading-none mb-2 uppercase">{product.name}</h3>
           <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed font-sans line-clamp-3">{product.description}</p>
         </div>
         <div className="text-right ml-4">
@@ -143,21 +157,35 @@ function ProductCard({ product, onAdd }: ProductCardProps) {
           </div>
         )}
 
-        {product.hasEssenceOptions && (
-          <div className="bg-gray-50 rounded-xl px-3 py-2">
+        {product.hasMilkOptions && menuOptions.milks.length > 0 && (
+          <div className="bg-gray-50 rounded-xl px-3 py-2 mt-2">
+             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">Elige tu leche:</span>
+             <select 
+               value={milk} 
+               onChange={(e) => setMilk(e.target.value)}
+               className="w-full bg-transparent text-[10px] font-bold uppercase tracking-wider text-indigo-brand focus:outline-none cursor-pointer"
+             >
+               <option value="">Selecciona...</option>
+               {menuOptions.milks.map(m => <option key={m} value={m}>{m}</option>)}
+             </select>
+          </div>
+        )}
+
+        {product.hasEssenceOptions && menuOptions.essences.length > 0 && (
+          <div className="bg-gray-50 rounded-xl px-3 py-2 mt-2">
              <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">Elige tu esencia:</span>
              <select 
                value={essence} 
                onChange={(e) => setEssence(e.target.value)}
                className="w-full bg-transparent text-[10px] font-bold uppercase tracking-wider text-indigo-brand focus:outline-none cursor-pointer"
              >
-               {essencesList.map(e => <option key={e} value={e === "Sin Esencia" ? "" : e}>{e}</option>)}
+               {menuOptions.essences.map(e => <option key={e} value={e === "Sin Esencia" ? "" : e}>{e}</option>)}
              </select>
           </div>
         )}
 
         <button
-          onClick={() => onAdd({ ...product, uniqueId: Math.random().toString(36), selectedTemp: temp, selectedEssence: essence, finalPrice: product.price })}
+          onClick={() => onAdd({ ...product, uniqueId: Math.random().toString(36), selectedTemp: temp, selectedEssence: essence, selectedMilk: milk, finalPrice: product.price })}
           disabled={!product.available}
           className={`w-full py-3 rounded-xl font-bold text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
         >

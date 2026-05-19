@@ -77,6 +77,7 @@ export default function Home() {
         let key = item.name;
         const details = [];
         if (item.selectedTemp) details.push(item.selectedTemp);
+        if (item.selectedMilk) details.push(`+ ${item.selectedMilk}`);
         if (item.selectedEssence) details.push(`+ ${item.selectedEssence}`);
         
         if (details.length > 0) {
@@ -277,6 +278,9 @@ export default function Home() {
                           <div className="flex gap-2 mt-1">
                              {item.selectedTemp && (
                                 <span className="text-[8px] font-bold bg-orange-brand/10 text-orange-brand px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedTemp}</span>
+                             )}
+                             {item.selectedMilk && (
+                                <span className="text-[8px] font-bold bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedMilk}</span>
                              )}
                              {item.selectedEssence && (
                                 <span className="text-[8px] font-bold bg-indigo-brand/10 text-indigo-brand px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedEssence}</span>

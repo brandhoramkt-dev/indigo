@@ -25,6 +25,7 @@ import BlogManager from "./admin/BlogManager";
 import ReservationViewer from "./admin/ReservationViewer";
 import TeamManager from "./admin/TeamManager";
 import PromoManager from "./admin/PromoManager";
+import MenuOptionsManager from "./admin/MenuOptionsManager";
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -42,6 +43,7 @@ export default function AdminDashboard() {
     { name: "Menú", icon: Coffee, path: "/admin/products" },
     { name: "Cultura", icon: BookOpen, path: "/admin/blog" },
     { name: "Portada", icon: Image, path: "/admin/promo" },
+    { name: "Opciones Menú", icon: Settings, path: "/admin/menu-options" },
     { name: "Reservas", icon: Calendar, path: "/admin/reservations" },
     { name: "Socios", icon: Users, path: "/admin/team" },
   ];
@@ -131,6 +133,7 @@ export default function AdminDashboard() {
           <Route path="/products" element={<ProductManager />} />
           <Route path="/blog" element={<BlogManager />} />
           <Route path="/promo" element={<PromoManager />} />
+          <Route path="/menu-options" element={<MenuOptionsManager />} />
           <Route path="/reservations" element={<ReservationViewer />} />
           <Route path="/team" element={<TeamManager />} />
         </Routes>
