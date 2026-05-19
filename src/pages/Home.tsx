@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from "motion/react";
 export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [cartStep, setCartStep] = useState<"list" | "qr">("list");
   const [isImageMenuOpen, setIsImageMenuOpen] = useState(false);
   const [promo, setPromo] = useState<any>(null);
 
@@ -70,12 +71,19 @@ export default function Home() {
     if (type === "reservation") {
       message = "*¡Hola Indigo Coffee! Quisiera reservar un espacio para hoy.* \n¿Podrían confirmarme disponibilidad?";
     } else {
-      if (cart.length === 0) return;
       message = "*¡Hola Indigo Coffee! Quisiera hacer el siguiente pedido:*\n\n";
-      cart.forEach((item, index) => {
-        message += `${index + 1}. *${item.name}*`;
-        if (item.selectedTemp) message += ` (${item.selectedTemp})`;
-        message += ` - Bs ${item.finalPrice}\n`;
+      
+      const itemCounts = cart.reduce((acc: any, item) => {
+        const key = `${item.name}${item.selectedTemp ? ` (${item.selectedTemp})` : ''}`;
+        if (!acc[key]) {
+          acc[key] = { count: 0, price: item.finalPrice };
+        }
+        acc[key].count += 1;
+        return acc;
+      }, {});
+
+      Object.entries(itemCounts).forEach(([key, data]: [string, any]) => {
+        message += `- ${key} (X${data.count})\n`;
       });
       message += `\n*TOTAL: Bs ${total.toFixed(2)}*\n\n`;
       
@@ -83,7 +91,7 @@ export default function Home() {
         message += "_*Nota: Sé que estoy fuera del horario de pedidos (8:30 - 15:00), quisiera consultar si es posible coordinar un delivery._\n\n";
       }
       
-      message += `_Enviado desde el Hub de Indigo Coffee_`;
+      message += `_esito nomás, muchas gracias_`;
     }
 
     const encodedMessage = encodeURIComponent(message);
@@ -220,86 +228,105 @@ export default function Home() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setIsCartOpen(false)}
+              onClick={() => { setIsCartOpen(false); setCartStep("list"); }}
               className="fixed inset-0 bg-indigo-dark/80 backdrop-blur-sm z-[60]"
             />
             <motion.div 
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col"
+              className="fixed bottom-0 left-0 right-0 w-full h-[90vh] md:h-full md:top-0 md:left-auto md:max-w-md bg-white z-[70] shadow-2xl flex flex-col rounded-t-3xl md:rounded-none"
             >
-              <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-indigo-brand text-white">
+              <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-indigo-brand text-white md:rounded-none rounded-t-3xl">
                 <div>
                   <h3 className="font-extenda font-black text-4xl uppercase tracking-tighter">TU PEDIDO</h3>
                   <p className="text-indigo-100 text-xs font-bold uppercase tracking-widest mt-1">Indigo Coffee Hub</p>
                 </div>
-                <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-white/10 rounded-full transition-colors">
+                <button onClick={() => { setIsCartOpen(false); setCartStep("list"); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
                   <X size={24} />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-8 space-y-6">
+              <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-4">
                 {!isOrderingTime() && (
                   <div className="bg-orange-brand/5 border border-orange-brand/10 p-4 rounded-xl text-orange-brand text-[10px] font-bold uppercase tracking-widest leading-relaxed">
                      Nota: Estás pidiendo fuera del horario estándar (8:30 - 15:00). Coordinaremos tu delivery o recojo vía WhatsApp.
                   </div>
                 )}
-                {cart.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center opacity-20">
-                    <ShoppingBag size={80} className="mb-4" />
-                    <p className="font-sans font-bold uppercase tracking-widest text-sm text-indigo-brand">Tu carrito está vacío</p>
-                  </div>
-                ) : (
-                  cart.map((item) => (
-                    <div key={item.uniqueId} className="flex justify-between items-start border-b border-gray-50 pb-6 group">
-                      <div>
-                        <h4 className="font-bold text-lg text-indigo-brand uppercase leading-tight font-sans">{item.name}</h4>
-                        <div className="flex gap-2 mt-2">
-                           {item.selectedTemp && (
-                              <span className="text-[9px] font-bold bg-orange-brand/10 text-orange-brand px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedTemp}</span>
-                           )}
-                        </div>
-                        <span className="text-gray-400 font-black text-xl mt-2 block font-sans">Bs {item.finalPrice}</span>
-                      </div>
-                      <button 
-                        onClick={() => removeFromCart(item.uniqueId)}
-                        className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                      >
-                        <Trash2 size={20} />
-                      </button>
+                
+                {cartStep === "list" ? (
+                  cart.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center opacity-20 pt-12">
+                      <ShoppingBag size={80} className="mb-4" />
+                      <p className="font-sans font-bold uppercase tracking-widest text-sm text-indigo-brand">Tu carrito está vacío</p>
                     </div>
-                  ))
+                  ) : (
+                    cart.map((item) => (
+                      <div key={item.uniqueId} className="flex justify-between items-center border-b border-gray-50 pb-4 group">
+                        <div className="flex-1">
+                          <h4 className="font-bold text-sm text-indigo-brand uppercase leading-tight font-sans">{item.name}</h4>
+                          <div className="flex gap-2 mt-1">
+                             {item.selectedTemp && (
+                                <span className="text-[8px] font-bold bg-orange-brand/10 text-orange-brand px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedTemp}</span>
+                             )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-gray-400 font-black text-sm font-sans whitespace-nowrap">Bs {item.finalPrice}</span>
+                          <button 
+                            onClick={() => removeFromCart(item.uniqueId)}
+                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )
+                ) : (
+                  <div className="h-full flex flex-col items-center justify-center text-center">
+                    <p className="text-xs font-black uppercase tracking-widest text-indigo-brand mb-6 leading-relaxed">
+                      Escanea el QR para pagar tu orden.<br/>Y prepara tu comprobante para enviarlo.
+                    </p>
+                    <img src="/indigo-qr-yape.png" alt="QR Yape" className="w-48 h-48 md:w-64 md:h-64 object-contain mb-8 rounded-2xl border border-gray-100 p-4 shadow-sm" />
+                    <button 
+                      onClick={() => setCartStep("list")}
+                      className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-indigo-brand transition-colors underline"
+                    >
+                      Volver al detalle del pedido
+                    </button>
+                  </div>
                 )}
               </div>
 
-              <div className="p-8 bg-gray-50 border-t border-gray-100">
+              <div className="p-6 md:p-8 bg-gray-50 border-t border-gray-100">
                 <div className="flex justify-between items-end mb-6">
                    <span className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">Subtotal a Pagar</span>
-                   <span className="font-sans font-black text-5xl text-indigo-brand">Bs {total.toFixed(2)}</span>
+                   <span className="font-sans font-black text-3xl md:text-5xl text-indigo-brand">Bs {total.toFixed(2)}</span>
                 </div>
-                
-                {cart.length > 0 && (
-                  <div className="mb-6 bg-white p-6 rounded-2xl border border-gray-100 flex flex-col items-center text-center shadow-sm">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-indigo-brand mb-4">Escanea para pagar</p>
-                    <img src="/indigo-qr-yape.png" alt="QR Yape" className="w-32 h-32 object-contain mb-4 rounded-xl border border-gray-100 p-2" />
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest leading-relaxed">
-                      Escanea el QR para pagar tu orden.<br/>Luego presiona enviar a WhatsApp con tu comprobante.
-                    </p>
-                  </div>
+
+                {cartStep === "list" ? (
+                  <button 
+                    onClick={() => setCartStep("qr")}
+                    disabled={cart.length === 0}
+                    className="w-full bg-indigo-brand hover:bg-orange-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-indigo-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                  >
+                    CONFIRMAR PEDIDO
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => sendOrder("whatsapp")}
+                    disabled={cart.length === 0}
+                    className="w-full bg-orange-brand hover:bg-indigo-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-orange-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
+                  >
+                    {isOrderingTime() ? "FINALIZAR PEDIDO (WHATSAPP)" : "CONSULTAR DISPONIBILIDAD"}
+                  </button>
                 )}
 
                 <button 
-                  onClick={() => sendOrder("whatsapp")}
-                  disabled={cart.length === 0}
-                  className="w-full bg-orange-brand hover:bg-indigo-brand text-white py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-orange-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                >
-                  {isOrderingTime() ? "ENVIAR A WHATSAPP" : "CONSULTAR DISPONIBILIDAD"}
-                </button>
-                <button 
-                  onClick={clearCart}
-                  className="w-full text-gray-400 hover:text-red-500 text-[10px] font-black uppercase tracking-widest mt-6 transition-colors"
+                  onClick={() => { clearCart(); setCartStep("list"); }}
+                  className="w-full text-gray-400 hover:text-red-500 text-[10px] font-black uppercase tracking-widest mt-4 transition-colors"
                 >
                   Vaciar Carrito
                 </button>
