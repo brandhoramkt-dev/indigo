@@ -46,7 +46,6 @@ export default function Home() {
 
   const addToCart = (item: CartItem) => {
     setCart(prev => [...prev, item]);
-    setIsCartOpen(true);
   };
 
   const removeFromCart = (uniqueId: string) => {
@@ -332,11 +331,30 @@ export default function Home() {
                  <div className="max-w-2xl w-full flex flex-col gap-8 mt-16 md:mt-8 pb-24">
                    <h2 className="text-4xl md:text-5xl font-extenda font-black text-white text-center tracking-tighter uppercase mb-4">NUESTRO <span className="text-orange-brand">MENÚ</span></h2>
                    <img src="/menuanv.png" alt="Menu Anverso" className="w-full rounded-2xl shadow-2xl border-4 border-white/10" />
-                   <img src="/menurev.png" alt="Menu Reverso" className="w-full rounded-2xl shadow-2xl border-4 border-white/10" />
                  </div>
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* Floating Cart Button (Mobile Optimized) */}
+      <AnimatePresence>
+        {cart.length > 0 && !isCartOpen && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            className="fixed bottom-6 left-0 right-0 px-6 z-[55] flex justify-center pointer-events-none"
+          >
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="pointer-events-auto w-full max-w-sm bg-orange-brand text-white px-8 py-4 rounded-full font-bold tracking-[0.2em] uppercase text-xs shadow-2xl shadow-orange-brand/30 flex items-center justify-between border-2 border-white/20 active:scale-95 transition-transform"
+            >
+              <span className="flex items-center gap-2"><ShoppingBag size={18} /> VER PEDIDO ({cart.length})</span>
+              <span>Bs {total.toFixed(2)}</span>
+            </button>
+          </motion.div>
         )}
       </AnimatePresence>
 
