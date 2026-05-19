@@ -6,21 +6,16 @@ import { Plus, Minus, Info } from "lucide-react";
 
 export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartItem) => void }) {
   const { data: products, loading } = useFirestoreCollection<Product>("products");
-  const categories = Object.values(Category);
-  const [selectedCategory, setSelectedCategory] = useState<string>(Category.CLASSICS);
+  const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean).sort();
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
+  const [isMenuExpanded, setIsMenuExpanded] = useState(false);
 
   // Auto-select first category that has products if current one is empty (only on first load)
   useEffect(() => {
     if (!loading && products.length > 0 && !hasAutoSelected) {
-      const currentHasProducts = products.some(p => p.category === selectedCategory);
-      if (!currentHasProducts) {
-        const firstWithProducts = categories.find(cat => 
-          products.some(p => p.category === cat)
-        );
-        if (firstWithProducts) {
-          setSelectedCategory(firstWithProducts);
-        }
+      if (!selectedCategory || !categories.includes(selectedCategory)) {
+        setSelectedCategory(categories[0] || "");
       }
       setHasAutoSelected(true);
     }
@@ -35,8 +30,30 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
           <span className="text-orange-brand font-bold uppercase tracking-widest text-xs mb-2 block font-sans">Selección de Barista</span>
           <h2 className="text-5xl md:text-7xl font-extenda font-black text-indigo-brand tracking-tighter uppercase leading-none">NUESTRO <span className="text-orange-brand italic">Menú</span></h2>
         </div>
-        
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 -mx-6 px-6 hide-scroll w-full md:w-auto">
+      </div>
+
+      <AnimatePresence>
+        {!isMenuExpanded ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, height: 0, overflow: "hidden" }}
+            className="flex justify-center py-12"
+          >
+            <button 
+              onClick={() => setIsMenuExpanded(true)}
+              className="bg-indigo-brand hover:bg-orange-brand text-white font-bold py-6 px-12 rounded-[2rem] text-sm md:text-base tracking-[0.2em] transition-all shadow-2xl active:scale-95 flex items-center gap-4 uppercase"
+            >
+              VER MENÚ Y REALIZAR PEDIDO <Plus size={24} />
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            className="space-y-12"
+          >
+            <div className="flex items-center gap-2 overflow-x-auto pb-4 -mx-6 px-6 hide-scroll w-full">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -47,18 +64,17 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
             </button>
           ))}
         </div>
-      </div>
 
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="bg-white rounded-3xl p-8 h-64 animate-pulse border border-gray-100"></div>
+            <div key={i} className="bg-white rounded-2xl p-6 h-48 animate-pulse border border-gray-100"></div>
           ))}
         </div>
       ) : (
         <motion.div 
           layout
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           <AnimatePresence>
             {filteredProducts.map((p) => (
@@ -76,6 +92,9 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
           )}
         </motion.div>
       )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
@@ -95,19 +114,19 @@ function ProductCard({ product, onAdd }: ProductCardProps) {
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
-      className="group bg-white rounded-3xl p-8 border border-gray-100 hover:border-orange-brand/30 hover:shadow-2xl transition-all relative overflow-hidden"
+      className="group bg-white rounded-2xl p-6 border border-gray-100 hover:border-orange-brand/30 hover:shadow-2xl transition-all relative overflow-hidden flex flex-col justify-between h-full"
     >
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="font-extenda font-black text-3xl text-indigo-brand group-hover:text-orange-brand transition-colors leading-none mb-2 uppercase">{product.name}</h3>
-          <p className="text-gray-400 text-sm font-light leading-relaxed font-sans">{product.description}</p>
+          <h3 className="font-extenda font-black text-2xl md:text-3xl text-indigo-brand group-hover:text-orange-brand transition-colors leading-none mb-2 uppercase">{product.name}</h3>
+          <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed font-sans line-clamp-3">{product.description}</p>
         </div>
         <div className="text-right ml-4">
-          <span className="font-extenda font-black text-3xl text-indigo-brand">Bs {product.price}</span>
+          <span className="font-extenda font-black text-2xl md:text-3xl text-indigo-brand whitespace-nowrap">Bs {product.price}</span>
         </div>
       </div>
 
-      <div className="space-y-4 font-sans">
+      <div className="space-y-3 font-sans mt-auto">
         {product.hasTemperatureOptions && (
           <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl">
             {(["Caliente", "Frío"] as const).map(t => (
@@ -125,7 +144,7 @@ function ProductCard({ product, onAdd }: ProductCardProps) {
         <button
           onClick={() => onAdd({ ...product, uniqueId: Math.random().toString(36), selectedTemp: temp, finalPrice: product.price })}
           disabled={!product.available}
-          className={`w-full py-4 rounded-2xl font-bold text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
+          className={`w-full py-3 rounded-xl font-bold text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
         >
           {product.available ? (
             <>

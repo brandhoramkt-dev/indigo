@@ -16,13 +16,15 @@ import {
   Clock,
   LayoutDashboard,
   Menu,
-  X
+  X,
+  Image
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import ProductManager from "./admin/ProductManager";
 import BlogManager from "./admin/BlogManager";
 import ReservationViewer from "./admin/ReservationViewer";
 import TeamManager from "./admin/TeamManager";
+import PromoManager from "./admin/PromoManager";
 
 export default function AdminDashboard() {
   const { user, logout } = useAuth();
@@ -39,6 +41,7 @@ export default function AdminDashboard() {
     { name: "Resumen", icon: LayoutDashboard, path: "/admin/dashboard" },
     { name: "Menú", icon: Coffee, path: "/admin/products" },
     { name: "Cultura", icon: BookOpen, path: "/admin/blog" },
+    { name: "Portada", icon: Image, path: "/admin/promo" },
     { name: "Reservas", icon: Calendar, path: "/admin/reservations" },
     { name: "Socios", icon: Users, path: "/admin/team" },
   ];
@@ -127,6 +130,7 @@ export default function AdminDashboard() {
           <Route path="/dashboard" element={<Overview />} />
           <Route path="/products" element={<ProductManager />} />
           <Route path="/blog" element={<BlogManager />} />
+          <Route path="/promo" element={<PromoManager />} />
           <Route path="/reservations" element={<ReservationViewer />} />
           <Route path="/team" element={<TeamManager />} />
         </Routes>

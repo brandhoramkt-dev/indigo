@@ -1,17 +1,10 @@
-export enum Category {
-  CLASSICS = "CAFÉS CLÁSICOS",
-  INFUSIONS = "INFUSIONES",
-  COOL = "ALGO COOL",
-  SWEET = "DEBILIDADES",
-  SANDWICHES = "SANDWICHES",
-  EXTRAS = "EXTRAS"
-}
+export type Category = string;
 
 export interface Product {
   id: string;
   name: string;
   price: number;
-  category: Category;
+  category: string;
   description: string;
   available: boolean;
   hasMilkOptions?: boolean;

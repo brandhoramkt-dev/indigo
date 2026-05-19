@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { collection, addDoc, updateDoc, deleteDoc, doc, serverTimestamp } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { useFirestoreCollection } from "../../lib/hooks";
-import { Product, Category } from "../../types";
+import { Product } from "../../types";
 import { Plus, Search, Edit2, Trash2, Check, X, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
@@ -15,7 +15,7 @@ export default function ProductManager() {
   // Form states
   const [name, setName] = useState("");
   const [price, setPrice] = useState("");
-  const [category, setCategory] = useState<Category>(Category.CLASSICS);
+  const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [hasMilk, setHasMilk] = useState(false);
   const [hasTemp, setHasTemp] = useState(false);
@@ -23,7 +23,7 @@ export default function ProductManager() {
   const resetForm = () => {
     setName("");
     setPrice("");
-    setCategory(Category.CLASSICS);
+    setCategory("");
     setDescription("");
     setHasMilk(false);
     setHasTemp(false);
@@ -82,6 +82,7 @@ export default function ProductManager() {
     setIsAdding(true);
   };
 
+  const existingCategories = Array.from(new Set(products.map(p => p.category))).filter(Boolean).sort();
   const filtered = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   // Removed handleSeedData
@@ -222,9 +223,18 @@ export default function ProductManager() {
                   </div>
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Categoría</label>
-                    <select value={category} onChange={(e) => setCategory(e.target.value as Category)} className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30 uppercase font-bold text-xs tracking-widest">
-                       {Object.values(Category).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </select>
+                    <input 
+                      type="text" 
+                      list="category-options"
+                      value={category} 
+                      onChange={(e) => setCategory(e.target.value)} 
+                      required 
+                      placeholder="Ej: CAFÉS CLÁSICOS"
+                      className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30 uppercase font-bold text-xs tracking-widest" 
+                    />
+                    <datalist id="category-options">
+                       {existingCategories.map(cat => <option key={cat} value={cat} />)}
+                    </datalist>
                   </div>
                   <div className="col-span-2">
                     <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Descripción Corta</label>

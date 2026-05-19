@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import MenuSection from "../components/MenuSection";
@@ -12,6 +14,18 @@ export default function Home() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isImageMenuOpen, setIsImageMenuOpen] = useState(false);
+  const [promo, setPromo] = useState<any>(null);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, "settings", "promo"), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().isActive) {
+        setPromo(docSnap.data());
+      } else {
+        setPromo(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Load cart from local storage
   useEffect(() => {
@@ -121,6 +135,46 @@ export default function Home() {
              </motion.div>
           </div>
         </section>
+
+        {promo && (
+          <section className="py-24 bg-white overflow-hidden border-y border-gray-100">
+            <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+               <motion.div
+                 initial={{ opacity: 0, x: -50 }}
+                 whileInView={{ opacity: 1, x: 0 }}
+                 viewport={{ once: true }}
+               >
+                  <span className="text-orange-brand font-bold uppercase tracking-widest text-xs mb-4 block font-sans">Especial de Temporada</span>
+                  <h2 className="text-5xl md:text-7xl font-extenda font-black tracking-tighter uppercase mb-6 text-indigo-brand leading-none">
+                    {promo.title}
+                  </h2>
+                  <p className="text-gray-500 text-lg mb-10 max-w-md font-light leading-relaxed font-sans whitespace-pre-line">
+                    {promo.text}
+                  </p>
+               </motion.div>
+               <motion.div 
+                 initial={{ opacity: 0, scale: 0.8 }}
+                 whileInView={{ opacity: 1, scale: 1 }}
+                 viewport={{ once: true }}
+                 className="relative"
+               >
+                  <div className="bg-indigo-brand/5 rounded-3xl p-4 border border-indigo-brand/10">
+                     <div className="w-full h-96 rounded-2xl overflow-hidden shadow-2xl relative">
+                        {promo.imageUrl && promo.imageUrl.includes(',') ? (
+                          <div className="w-full h-full flex overflow-x-auto hide-scroll snap-x snap-mandatory">
+                            {promo.imageUrl.split(',').map((url: string, i: number) => (
+                              <img key={i} src={url.trim()} alt="Promo" className="w-full h-full object-cover flex-shrink-0 snap-center" referrerPolicy="no-referrer" />
+                            ))}
+                          </div>
+                        ) : (
+                          <img src={promo.imageUrl || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085"} alt="Promo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                        )}
+                     </div>
+                  </div>
+               </motion.div>
+            </div>
+          </section>
+        )}
 
         <section className="bg-bg-warm border-y border-gray-100">
            {!isOrderingTime() && (
