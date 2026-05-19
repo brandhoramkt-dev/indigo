@@ -46,6 +46,12 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // 5. Settings
+    match /settings/{settingId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
     // --- Validation Helpers (Blueprints) ---
     // (Simplificado temporalmente para evitar rechazos por campos opcionales)
     function isValidProduct(data) {
