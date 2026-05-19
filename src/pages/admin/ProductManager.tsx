@@ -19,6 +19,7 @@ export default function ProductManager() {
   const [description, setDescription] = useState("");
   const [hasMilk, setHasMilk] = useState(false);
   const [hasTemp, setHasTemp] = useState(false);
+  const [hasEssence, setHasEssence] = useState(false);
 
   const resetForm = () => {
     setName("");
@@ -27,6 +28,7 @@ export default function ProductManager() {
     setDescription("");
     setHasMilk(false);
     setHasTemp(false);
+    setHasEssence(false);
     setIsAdding(false);
     setEditingId(null);
   };
@@ -43,6 +45,7 @@ export default function ProductManager() {
       available: true,
       hasMilkOptions: hasMilk,
       hasTemperatureOptions: hasTemp,
+      hasEssenceOptions: hasEssence,
       updatedAt: serverTimestamp()
     };
 
@@ -78,6 +81,7 @@ export default function ProductManager() {
     setDescription(p.description || "");
     setHasMilk(!!p.hasMilkOptions);
     setHasTemp(!!p.hasTemperatureOptions);
+    setHasEssence(!!p.hasEssenceOptions);
     setEditingId(p.id);
     setIsAdding(true);
   };
@@ -250,6 +254,10 @@ export default function ProductManager() {
                    <label className="flex items-center gap-3 cursor-pointer">
                       <input type="checkbox" checked={hasTemp} onChange={(e) => setHasTemp(e.target.checked)} className="w-5 h-5 rounded-lg border-gray-300 text-indigo-brand focus:ring-indigo-brand" />
                       <span className="text-sm font-bold uppercase tracking-widest text-indigo-brand">Opciones de Temperatura</span>
+                   </label>
+                   <label className="flex items-center gap-3 cursor-pointer">
+                      <input type="checkbox" checked={hasEssence} onChange={(e) => setHasEssence(e.target.checked)} className="w-5 h-5 rounded-lg border-gray-300 text-indigo-brand focus:ring-indigo-brand" />
+                      <span className="text-sm font-bold uppercase tracking-widest text-indigo-brand">Opciones de Esencia</span>
                    </label>
                 </div>
 

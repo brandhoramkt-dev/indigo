@@ -107,6 +107,8 @@ interface ProductCardProps {
 
 function ProductCard({ product, onAdd }: ProductCardProps) {
   const [temp, setTemp] = useState<"Caliente" | "Frío">("Caliente");
+  const [essence, setEssence] = useState<string>("");
+  const essencesList = ["Sin Esencia", "Vainilla", "Caramelo", "Avellana", "Amaretto"];
 
   return (
     <motion.div
@@ -141,8 +143,21 @@ function ProductCard({ product, onAdd }: ProductCardProps) {
           </div>
         )}
 
+        {product.hasEssenceOptions && (
+          <div className="bg-gray-50 rounded-xl px-3 py-2">
+             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">Elige tu esencia:</span>
+             <select 
+               value={essence} 
+               onChange={(e) => setEssence(e.target.value)}
+               className="w-full bg-transparent text-[10px] font-bold uppercase tracking-wider text-indigo-brand focus:outline-none cursor-pointer"
+             >
+               {essencesList.map(e => <option key={e} value={e === "Sin Esencia" ? "" : e}>{e}</option>)}
+             </select>
+          </div>
+        )}
+
         <button
-          onClick={() => onAdd({ ...product, uniqueId: Math.random().toString(36), selectedTemp: temp, finalPrice: product.price })}
+          onClick={() => onAdd({ ...product, uniqueId: Math.random().toString(36), selectedTemp: temp, selectedEssence: essence, finalPrice: product.price })}
           disabled={!product.available}
           className={`w-full py-3 rounded-xl font-bold text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
         >

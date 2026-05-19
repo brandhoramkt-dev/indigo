@@ -9,6 +9,7 @@ export interface Product {
   available: boolean;
   hasMilkOptions?: boolean;
   hasTemperatureOptions?: boolean;
+  hasEssenceOptions?: boolean;
   imageUrl?: string;
   updatedAt?: any;
 }
@@ -46,5 +47,6 @@ export interface CartItem extends Product {
   selectedTemp?: "Caliente" | "Frío";
   selectedMilk?: string;
   selectedFlavor?: string;
+  selectedEssence?: string;
   finalPrice: number;
 }
