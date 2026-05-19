@@ -33,7 +33,7 @@ export default function Hero({ onOpenImageMenu }: { onOpenImageMenu?: () => void
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 flex-wrap">
             <a 
               href="#menu"
-              className="group bg-orange-brand hover:bg-white text-white hover:text-indigo-brand px-8 py-4 rounded-2xl font-bold transition-all shadow-2xl flex items-center gap-3 active:scale-95 w-full sm:w-auto text-sm"
+              className="group bg-orange-brand hover:bg-white text-white hover:text-indigo-brand px-8 py-4 rounded-2xl font-bold transition-all shadow-2xl flex items-center justify-center gap-3 active:scale-95 w-full sm:w-auto text-sm"
             >
               ORDENAR
               <ShoppingCart size={18} className="group-hover:translate-x-1 transition-transform" />

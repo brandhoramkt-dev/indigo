@@ -83,7 +83,7 @@ export default function Home() {
       }, {});
 
       Object.entries(itemCounts).forEach(([key, data]: [string, any]) => {
-        message += `- ${key} (X${data.count})\n`;
+        message += `• ${key} (X${data.count})\n`;
       });
       message += `\n*TOTAL: Bs ${total.toFixed(2)}*\n\n`;
       
@@ -289,7 +289,17 @@ export default function Home() {
                     <p className="text-xs font-black uppercase tracking-widest text-indigo-brand mb-6 leading-relaxed">
                       Escanea el QR para pagar tu orden.<br/>Y prepara tu comprobante para enviarlo.
                     </p>
-                    <img src="/indigo-qr-yape.png" alt="QR Yape" className="w-48 h-48 md:w-64 md:h-64 object-contain mb-8 rounded-2xl border border-gray-100 p-4 shadow-sm" />
+                    <img src="/indigo-qr-yape.png" alt="QR Yape" className="w-64 h-64 md:w-80 md:h-80 object-contain mb-4 rounded-2xl border border-gray-100 p-4 shadow-sm" />
+                    
+                    <a 
+                      href="/indigo-qr-yape.png" 
+                      download="Indigo-QR.png"
+                      className="mb-8 text-[10px] text-indigo-brand font-bold uppercase tracking-widest hover:text-orange-brand transition-colors flex items-center gap-2 border border-indigo-brand/20 px-4 py-2 rounded-full"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                      Descargar QR
+                    </a>
+
                     <button 
                       onClick={() => setCartStep("list")}
                       className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-indigo-brand transition-colors underline"

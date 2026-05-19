@@ -52,7 +52,7 @@ export default function Footer() {
              </p>
              <div className="w-full h-32 rounded-xl overflow-hidden border border-white/10 opacity-70 hover:opacity-100 transition-opacity">
                <iframe 
-                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1154.512684813586!2d-68.0827179!3d-16.5398299!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x915f212268cd1df9%3A0x6b107eec52857e4e!2sIndigo%20Coffee%20Hub!5e0!3m2!1sen!2sbo!4v1715456789012!5m2!1sen!2sbo" 
+                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3824.7330543547587!2d-68.08075400000004!3d-16.53956899999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x915f21000a3d1701%3A0x582756a3c48badd4!2sINDIGO!5e0!3m2!1ses!2sbo!4v1779206551424!5m2!1ses!2sbo" 
                  width="100%" 
                  height="100%" 
                  style={{ border: 0 }} 
