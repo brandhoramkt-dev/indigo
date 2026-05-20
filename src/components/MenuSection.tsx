@@ -6,7 +6,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Plus, Minus, Info } from "lucide-react";
 
-export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartItem) => void }) {
+export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (item: CartItem) => void, disabled?: boolean }) {
   const { data: products, loading } = useFirestoreCollection<Product>("products");
   const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean).sort();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -93,7 +93,7 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
         >
           <AnimatePresence>
             {filteredProducts.map((p) => (
-              <ProductCard key={p.id} product={p} onAdd={onAddToCart} menuOptions={menuOptions} />
+              <ProductCard key={p.id} product={p} onAdd={onAddToCart} menuOptions={menuOptions} disabled={disabled} />
             ))}
           </AnimatePresence>
           {filteredProducts.length === 0 && (
@@ -117,9 +117,11 @@ export default function MenuSection({ onAddToCart }: { onAddToCart: (item: CartI
 interface ProductCardProps {
   product: Product;
   menuOptions: { milks: string[], essences: string[] };
+  onAdd: (item: CartItem) => void;
+  disabled?: boolean;
 }
 
-function ProductCard({ product, onAdd, menuOptions }: ProductCardProps) {
+function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps) {
   const [temp, setTemp] = useState<"Caliente" | "Frío">("Caliente");
   const [essence, setEssence] = useState<string>("");
   const [milk, setMilk] = useState<string>("");
@@ -186,8 +188,8 @@ function ProductCard({ product, onAdd, menuOptions }: ProductCardProps) {
 
         <button
           onClick={() => onAdd({ ...product, uniqueId: Math.random().toString(36), selectedTemp: temp, selectedEssence: essence, selectedMilk: milk, finalPrice: product.price })}
-          disabled={!product.available}
-          className={`w-full py-3 rounded-xl font-bold text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
+          disabled={!product.available || disabled}
+          className={`w-full py-3 rounded-xl font-bold text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available && !disabled ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
         >
           {product.available ? (
             <>

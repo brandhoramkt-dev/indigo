@@ -16,16 +16,27 @@ export default function Home() {
   const [cartStep, setCartStep] = useState<"list" | "qr">("list");
   const [isImageMenuOpen, setIsImageMenuOpen] = useState(false);
   const [promo, setPromo] = useState<any>(null);
+  const [storeOpen, setStoreOpen] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(doc(db, "settings", "promo"), (docSnap) => {
+    const unsubscribePromo = onSnapshot(doc(db, "settings", "promo"), (docSnap) => {
       if (docSnap.exists() && docSnap.data().isActive) {
         setPromo(docSnap.data());
       } else {
         setPromo(null);
       }
     });
-    return () => unsubscribe();
+    
+    const unsubscribeStore = onSnapshot(doc(db, "settings", "store"), (docSnap) => {
+      if (docSnap.exists()) {
+        setStoreOpen(docSnap.data().isOpen ?? true);
+      }
+    });
+
+    return () => {
+      unsubscribePromo();
+      unsubscribeStore();
+    };
   }, []);
 
   // Load cart from local storage
@@ -192,16 +203,22 @@ export default function Home() {
           </section>
         )}
 
-        <section className="bg-bg-warm border-y border-gray-100">
-           {!isOrderingTime() && (
+         <section className="bg-bg-warm border-y border-gray-100">
+           {!storeOpen ? (
+             <div className="bg-red-500/10 border-b border-red-500/20 p-4 text-center">
+                <p className="text-red-700 font-bold text-xs uppercase tracking-widest">
+                  ⚠️ La tienda se encuentra cerrada por el momento. No estamos recibiendo pedidos.
+                </p>
+             </div>
+           ) : !isOrderingTime() ? (
              <div className="bg-yellow-brand/10 border-b border-yellow-brand/20 p-4 text-center">
                 <p className="text-indigo-dark font-bold text-xs uppercase tracking-widest">
                   ⚠️ Fuera de horario de pedidos (8:30 - 15:00). Consulta disponibilidad de delivery por WhatsApp.
                 </p>
              </div>
-           )}
-           <MenuSection onAddToCart={addToCart} />
-        </section>
+           ) : null}
+           <MenuSection onAddToCart={addToCart} disabled={!storeOpen} />
+         </section>
 
         {/* Culture Section */}
         <section id="cultura" className="py-24 bg-white">
@@ -258,11 +275,15 @@ export default function Home() {
               </div>
 
               <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-4">
-                {!isOrderingTime() && (
+                {!storeOpen ? (
+                  <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-600 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                     ⚠️ La tienda se encuentra cerrada hoy. Por el momento no estamos recibiendo pedidos, inténtalo más tarde.
+                  </div>
+                ) : !isOrderingTime() ? (
                   <div className="bg-orange-brand/5 border border-orange-brand/10 p-4 rounded-xl text-orange-brand text-[10px] font-bold uppercase tracking-widest leading-relaxed">
                      Nota: Estás pidiendo fuera del horario estándar (8:30 - 15:00). Coordinaremos tu delivery o recojo vía WhatsApp.
                   </div>
-                )}
+                ) : null}
                 
                 {cartStep === "list" ? (
                   cart.length === 0 ? (
@@ -334,7 +355,7 @@ export default function Home() {
                 {cartStep === "list" ? (
                   <button 
                     onClick={() => setCartStep("qr")}
-                    disabled={cart.length === 0}
+                    disabled={cart.length === 0 || !storeOpen}
                     className="w-full bg-indigo-brand hover:bg-orange-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-indigo-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
                     CONFIRMAR PEDIDO
@@ -342,7 +363,7 @@ export default function Home() {
                 ) : (
                   <button 
                     onClick={() => sendOrder("whatsapp")}
-                    disabled={cart.length === 0}
+                    disabled={cart.length === 0 || !storeOpen}
                     className="w-full bg-orange-brand hover:bg-indigo-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-orange-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
                     {isOrderingTime() ? "FINALIZAR PEDIDO (WHATSAPP)" : "CONSULTAR DISPONIBILIDAD"}
@@ -410,7 +431,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <CoffeeMatchmaker />
+      <CoffeeMatchmaker onAddToCart={addToCart} />
     </div>
   );
 }

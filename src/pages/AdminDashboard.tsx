@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, Routes, Route, useNavigate } from "react-router-dom";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 import { useFirestoreCollection } from "../lib/hooks";
 import { useAuth } from "../lib/AuthContext";
 import { 
@@ -85,7 +87,7 @@ export default function AdminDashboard() {
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
         md:relative md:translate-x-0 md:sticky md:top-0 md:h-screen
       `}>
-        <div className="p-8 pb-12">
+        <div className="p-8 pt-24 md:pt-8 pb-12">
           <div className="hidden md:flex items-center gap-3 mb-12">
              <div className="w-10 h-10 bg-orange-brand rounded-xl flex items-center justify-center">
                 <Coffee size={24} />
@@ -146,22 +148,50 @@ function Overview() {
   const { data: products } = useFirestoreCollection("products");
   const { data: admins } = useFirestoreCollection("admins");
   const { data: reservations } = useFirestoreCollection("reservations");
+  const [storeOpen, setStoreOpen] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, "settings", "store"), (docSnap) => {
+      if (docSnap.exists()) {
+         setStoreOpen(docSnap.data().isOpen ?? true);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const toggleStoreStatus = async () => {
+    try {
+      await setDoc(doc(db, "settings", "store"), { isOpen: !storeOpen }, { merge: true });
+    } catch (e: any) {
+      console.error("Error al actualizar el estado de la tienda", e);
+      alert("Hubo un error al actualizar el estado. ¿Tienes permisos de administrador? " + e.message);
+    }
+  };
 
   const today = new Date().toISOString().split('T')[0];
   const todayReservations = reservations?.filter((r: any) => r.date === today) || [];
 
   return (
     <div className="space-y-12">
-      <header className="flex justify-between items-end">
+      <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 md:gap-0">
         <div>
-           <h1 className="text-5xl font-display font-black text-indigo-brand tracking-tighter uppercase">RESUMEN <span className="text-orange-brand">OPERATIVO</span></h1>
-           <p className="text-gray-400 mt-2 font-medium">Bienvenido de nuevo al centro de mando de Indigo Coffee.</p>
+           <h1 className="text-4xl md:text-5xl font-display font-black text-indigo-brand tracking-tighter uppercase">RESUMEN <span className="text-orange-brand">OPERATIVO</span></h1>
+           <p className="text-gray-400 mt-2 font-medium text-sm md:text-base">Bienvenido de nuevo al centro de mando de Indigo Coffee.</p>
         </div>
-        <div className="text-right">
-           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 mb-1">Estado de la Tienda</p>
-           <span className="bg-green-500/10 text-green-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border border-green-500/20 flex items-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Abierto
-           </span>
+        <div className="flex flex-col items-start md:items-end bg-white md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none border md:border-none border-gray-100 shadow-sm md:shadow-none w-full md:w-auto">
+           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 mb-2">Estado de la Tienda</p>
+           <button 
+             onClick={toggleStoreStatus}
+             className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest border flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-sm ${
+               storeOpen 
+                 ? "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20" 
+                 : "bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20"
+             }`}
+           >
+              <span className={`w-2.5 h-2.5 rounded-full ${storeOpen ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"}`}></span> 
+              {storeOpen ? "Abierto" : "Cerrado (Pedidos Desactivados)"}
+           </button>
+           <p className="text-[9px] text-gray-400 mt-2 max-w-[200px] md:text-right">Click para {storeOpen ? "desactivar" : "activar"} los pedidos en la página principal.</p>
         </div>
       </header>
 
