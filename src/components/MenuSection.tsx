@@ -187,7 +187,14 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
         )}
 
         <button
-          onClick={() => onAdd({ ...product, uniqueId: Math.random().toString(36), selectedTemp: temp, selectedEssence: essence, selectedMilk: milk, finalPrice: product.price })}
+          onClick={() => onAdd({ 
+            ...product, 
+            uniqueId: Math.random().toString(36), 
+            selectedTemp: product.hasTemperatureOptions ? temp : undefined, 
+            selectedEssence: (product.hasEssenceOptions && essence) ? essence : undefined, 
+            selectedMilk: (product.hasMilkOptions && milk) ? milk : undefined, 
+            finalPrice: product.price 
+          })}
           disabled={!product.available || disabled}
           className={`w-full py-3 rounded-xl font-bold text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available && !disabled ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
         >
