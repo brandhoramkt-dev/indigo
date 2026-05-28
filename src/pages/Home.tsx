@@ -12,24 +12,29 @@ import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { useFirestoreCollection } from "../lib/hooks";
 import { BlogPost } from "../types";
+import { Helmet } from "react-helmet-async";
+import { translateContent } from "../lib/translator";
 
 export default function Home() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartStep, setCartStep] = useState<"list" | "qr">("list");
   const [isImageMenuOpen, setIsImageMenuOpen] = useState(false);
   const [promo, setPromo] = useState<any>(null);
+  const [translatedPromo, setTranslatedPromo] = useState<any>(null);
   const [storeOpen, setStoreOpen] = useState(true);
   
   const { data: blogPosts } = useFirestoreCollection<BlogPost>("blogPosts");
+  const [translatedBlogPosts, setTranslatedBlogPosts] = useState<BlogPost[]>([]);
 
   useEffect(() => {
     const unsubscribePromo = onSnapshot(doc(db, "settings", "promo"), (docSnap) => {
       if (docSnap.exists() && docSnap.data().isActive) {
-        setPromo(docSnap.data());
+        setPromo({ id: "promo", ...docSnap.data() });
       } else {
         setPromo(null);
+        setTranslatedPromo(null);
       }
     });
     
@@ -44,6 +49,20 @@ export default function Home() {
       unsubscribeStore();
     };
   }, []);
+
+  useEffect(() => {
+    const runTranslations = async () => {
+      if (promo) {
+        const translated = await translateContent([promo], i18n.language, 'promo', ['title', 'text']);
+        setTranslatedPromo(translated[0]);
+      }
+      if (blogPosts && blogPosts.length > 0) {
+        const translated = await translateContent(blogPosts, i18n.language, 'blog', ['title', 'summary', 'content']);
+        setTranslatedBlogPosts(translated);
+      }
+    };
+    runTranslations();
+  }, [i18n.language, promo, blogPosts]);
 
   // Load cart from local storage
   useEffect(() => {
@@ -126,6 +145,14 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen">
+      <Helmet>
+        <title>Indigo Coffee Hub - Specialty Coffee & Cowork in La Paz</title>
+        <meta name="description" content={t("seo.desc", "El mejor café de especialidad y espacio de cowork en La Paz, Bolivia. Un espacio diseñado para creadores y soñadores.")} />
+        <meta property="og:title" content="Indigo Coffee Hub" />
+        <meta property="og:description" content={t("seo.desc", "El mejor café de especialidad y espacio de cowork en La Paz, Bolivia.")} />
+        <meta property="og:image" content="https://indigocoffee.web.app/logo.png" />
+      </Helmet>
+
       <Navbar cartCount={cart.length} onOpenCart={() => setIsCartOpen(true)} />
       
       <main>
@@ -169,7 +196,7 @@ export default function Home() {
           </div>
         </section>
 
-        {promo && (
+        {(translatedPromo || promo) && (
           <section className="py-24 bg-white overflow-hidden border-y border-gray-100">
             <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
                <motion.div
@@ -179,10 +206,10 @@ export default function Home() {
                >
                   <span className="text-orange-brand font-bold uppercase tracking-widest text-xs mb-4 block font-sans">{t("home.seasonal", "Especial de Temporada")}</span>
                   <h2 className="text-5xl md:text-7xl font-extenda font-black tracking-tighter uppercase mb-6 text-indigo-brand leading-none">
-                    {promo.title}
+                    {(translatedPromo || promo).title}
                   </h2>
                   <p className="text-gray-500 text-lg mb-10 max-w-md font-light leading-relaxed font-sans whitespace-pre-line">
-                    {promo.text}
+                    {(translatedPromo || promo).text}
                   </p>
                </motion.div>
                <motion.div 
@@ -233,11 +260,12 @@ export default function Home() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-               {blogPosts.length > 0 ? blogPosts.map((post) => (
+               {translatedBlogPosts.length > 0 ? translatedBlogPosts.map((post) => (
                  <CultureCard 
                    key={post.id}
                    title={post.title}
                    excerpt={post.summary}
+                   content={post.content}
                    image={post.imageUrl}
                  />
                )) : (
@@ -441,21 +469,52 @@ export default function Home() {
   );
 }
 
-function CultureCard({ title, excerpt, image }: { title: string, excerpt: string, image: string }) {
+function CultureCard({ title, excerpt, content, image }: { title: string, excerpt: string, content: string, image: string }) {
   const { t } = useTranslation();
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <motion.div 
-      whileHover={{ y: -5 }}
-      className="group cursor-pointer"
-    >
-       <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
-          <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" referrerPolicy="no-referrer" />
-          <div className="absolute inset-0 bg-gradient-to-t from-indigo-brand/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-       </div>
-       <h3 className="font-extenda font-black text-3xl text-indigo-brand uppercase group-hover:text-orange-brand transition-colors mb-4">{title}</h3>
-       <p className="text-gray-500 font-light leading-relaxed mb-6 font-sans">{excerpt}</p>
-       <span className="text-orange-brand font-bold text-sm tracking-widest flex items-center gap-2 font-sans">{t("home.readMore", "LEER MÁS")} <X size={16} className="rotate-45" /></span>
-    </motion.div>
+    <>
+      <motion.div 
+        whileHover={{ y: -5 }}
+        className="group cursor-pointer flex flex-col h-full"
+        onClick={() => setIsOpen(true)}
+      >
+         <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
+            <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" referrerPolicy="no-referrer" />
+            <div className="absolute inset-0 bg-gradient-to-t from-indigo-brand/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+         </div>
+         <h3 className="font-extenda font-black text-3xl text-indigo-brand uppercase group-hover:text-orange-brand transition-colors mb-4">{title}</h3>
+         <p className="text-gray-500 font-light leading-relaxed mb-6 font-sans flex-grow">{excerpt}</p>
+         <span className="text-orange-brand font-bold text-sm tracking-widest flex items-center gap-2 font-sans mt-auto">{t("home.readMore", "LEER MÁS")} <X size={16} className="rotate-45" /></span>
+      </motion.div>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-white overflow-y-auto"
+          >
+            <div className="relative h-96 md:h-[60vh] w-full">
+              <img src={image} alt={title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-black/20 to-black/60"></div>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="absolute top-6 right-6 p-4 bg-white/20 hover:bg-white text-white hover:text-indigo-brand rounded-full backdrop-blur-md transition-all z-10 shadow-2xl"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <div className="max-w-3xl mx-auto px-6 py-16 -mt-20 relative z-10 bg-white rounded-t-[3rem] shadow-2xl">
+              <h2 className="text-5xl md:text-7xl font-extenda font-black text-indigo-brand uppercase mb-8 leading-none tracking-tighter">{title}</h2>
+              <div className="prose prose-lg prose-indigo max-w-none text-gray-600 font-serif leading-relaxed whitespace-pre-wrap">
+                {content}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
@@ -471,10 +530,19 @@ function PromoCarousel({ images }: { images: string[] }) {
     return () => clearInterval(interval);
   }, [images.length]);
 
+  const handleDragEnd = (e: any, { offset, velocity }: any) => {
+    const swipe = Math.abs(offset.x) * velocity.x;
+    if (swipe < -100) {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    } else if (swipe > 100) {
+      setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    }
+  };
+
   return (
     <>
       <div 
-        className="w-full relative overflow-hidden rounded-2xl cursor-pointer shadow-inner" 
+        className="w-full relative overflow-hidden rounded-2xl cursor-pointer shadow-inner group" 
         style={{ aspectRatio: "4/5" }}
         onClick={() => setIsFullScreen(true)}
       >
@@ -483,22 +551,26 @@ function PromoCarousel({ images }: { images: string[] }) {
             key={currentIndex}
             src={images[currentIndex]} 
             alt="Promo"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={1}
+            onDragEnd={handleDragEnd}
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
-            className="w-full h-full object-cover absolute inset-0"
+            className="w-full h-full object-cover absolute inset-0 cursor-grab active:cursor-grabbing"
             referrerPolicy="no-referrer"
           />
         </AnimatePresence>
         
         {/* Indicators */}
-        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-10 bg-gradient-to-t from-black/50 to-transparent pt-8 pb-4">
+        <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-3 z-10 bg-gradient-to-t from-black/80 to-transparent pt-16 pb-6 pointer-events-none transition-opacity">
           {images.map((_, i) => (
             <div 
               key={i} 
               onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
-              className={`h-2 rounded-full transition-all cursor-pointer shadow-sm ${i === currentIndex ? 'bg-orange-brand w-8' : 'bg-white/60 w-2 hover:bg-white'}`} 
+              className={`h-2 rounded-full transition-all cursor-pointer shadow-sm pointer-events-auto ${i === currentIndex ? 'bg-orange-brand w-8' : 'bg-white/60 w-2 hover:bg-white'}`} 
             />
           ))}
         </div>

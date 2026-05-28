@@ -98,3 +98,90 @@ ${JSON.stringify(payload, null, 2)}
   // Keep original ordering
   return products.map(p => translatedProducts.find(t => t.id === p.id) || p);
 }
+
+export async function translateContent<T extends { id: string }>(
+  items: T[], 
+  targetLanguage: string,
+  cacheKeyPrefix: string,
+  fieldsToTranslate: (keyof T)[]
+): Promise<T[]> {
+  if (targetLanguage.startsWith("es")) return items;
+  
+  const langKey = "en"; 
+  const translatedItems: T[] = [];
+  const itemsToTranslate: T[] = [];
+
+  // Check cache
+  for (const item of items) {
+    const cached = localStorage.getItem(`${CACHE_KEY}${cacheKeyPrefix}_${langKey}_${item.id}`);
+    if (cached) {
+      try {
+        translatedItems.push({ ...item, ...JSON.parse(cached) });
+      } catch(e) {
+        itemsToTranslate.push(item);
+      }
+    } else {
+      itemsToTranslate.push(item);
+    }
+  }
+
+  if (itemsToTranslate.length === 0) {
+    return items.map(p => translatedItems.find(t => t.id === p.id) || p);
+  }
+
+  // Prepare payload
+  const payload = itemsToTranslate.map(p => {
+    const obj: any = { id: p.id };
+    fieldsToTranslate.forEach(field => {
+      obj[field] = p[field];
+    });
+    return obj;
+  });
+
+  const prompt = `
+Translate the following items from Spanish to English.
+Return strictly a valid JSON array of objects with the exact same 'id' and the translated fields: ${fieldsToTranslate.join(", ")}.
+
+Input:
+${JSON.stringify(payload, null, 2)}
+`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: { responseMimeType: "application/json" }
+    });
+
+    const text = response.text || "[]";
+    const translations = JSON.parse(text);
+
+    for (const translation of translations) {
+      const originalIndex = itemsToTranslate.findIndex(p => p.id === translation.id);
+      if (originalIndex !== -1) {
+        const originalItem = itemsToTranslate[originalIndex];
+        const translatedItem = { ...originalItem } as any;
+        const cacheObj: any = {};
+        
+        fieldsToTranslate.forEach(field => {
+          translatedItem[field] = translation[field] || originalItem[field];
+          cacheObj[field] = translatedItem[field];
+        });
+        
+        localStorage.setItem(`${CACHE_KEY}${cacheKeyPrefix}_${langKey}_${originalItem.id}`, JSON.stringify(cacheObj));
+        translatedItems.push(translatedItem as T);
+      }
+    }
+    
+    for (const item of itemsToTranslate) {
+      if (!translations.find((t: any) => t.id === item.id)) {
+        translatedItems.push(item);
+      }
+    }
+  } catch (error) {
+    console.error(`Translation failed for ${cacheKeyPrefix}:`, error);
+    return items.map(p => translatedItems.find(t => t.id === p.id) || p);
+  }
+
+  return items.map(p => translatedItems.find(t => t.id === p.id) || p);
+}
