@@ -10,6 +10,8 @@ import { CartItem } from "../types";
 import { X, Trash2, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "react-i18next";
+import { useFirestoreCollection } from "../lib/hooks";
+import { BlogPost } from "../types";
 
 export default function Home() {
   const { t } = useTranslation();
@@ -19,6 +21,8 @@ export default function Home() {
   const [isImageMenuOpen, setIsImageMenuOpen] = useState(false);
   const [promo, setPromo] = useState<any>(null);
   const [storeOpen, setStoreOpen] = useState(true);
+  
+  const { data: blogPosts } = useFirestoreCollection<BlogPost>("blogPosts");
 
   useEffect(() => {
     const unsubscribePromo = onSnapshot(doc(db, "settings", "promo"), (docSnap) => {
@@ -188,15 +192,13 @@ export default function Home() {
                  className="relative"
                >
                   <div className="bg-indigo-brand/5 rounded-3xl p-4 border border-indigo-brand/10">
-                     <div className="w-full h-96 rounded-2xl overflow-hidden shadow-2xl relative">
+                     <div className="w-full rounded-2xl shadow-2xl relative flex items-center justify-center">
                         {promo.imageUrl && promo.imageUrl.includes(',') ? (
-                          <div className="w-full h-full flex overflow-x-auto hide-scroll snap-x snap-mandatory">
-                            {promo.imageUrl.split(',').map((url: string, i: number) => (
-                              <img key={i} src={url.trim()} alt="Promo" className="w-full h-full object-cover flex-shrink-0 snap-center" referrerPolicy="no-referrer" />
-                            ))}
-                          </div>
+                          <PromoCarousel images={promo.imageUrl.split(',').map((u: string) => u.trim())} />
                         ) : (
-                          <img src={promo.imageUrl || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085"} alt="Promo" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                          <div className="w-full relative overflow-hidden rounded-2xl" style={{ aspectRatio: "4/5" }}>
+                            <img src={promo.imageUrl || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085"} alt="Promo" className="w-full h-full object-cover absolute inset-0" referrerPolicy="no-referrer" />
+                          </div>
                         )}
                      </div>
                   </div>
@@ -231,16 +233,18 @@ export default function Home() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-               <CultureCard 
-                 title={t("home.culture1Title", "El Origen del Grano")}
-                 excerpt={t("home.culture1Desc", "Bolivia tiene alturas únicas que dan a nuestro café notas de chocolate y cítricos imposibles de replicar...")}
-                 image="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=2070&auto=format&fit=crop"
-               />
-               <CultureCard 
-                 title={t("home.culture2Title", "Arte en el Espacio")}
-                 excerpt={t("home.culture2Desc", "Más que un café, somos un punto de encuentro para creativos, nómadas digitales y soñadores de La Paz...")}
-                 image="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2047&auto=format&fit=crop"
-               />
+               {blogPosts.length > 0 ? blogPosts.map((post) => (
+                 <CultureCard 
+                   key={post.id}
+                   title={post.title}
+                   excerpt={post.summary}
+                   image={post.imageUrl}
+                 />
+               )) : (
+                 <div className="col-span-full py-12 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
+                    <p className="text-gray-400 font-sans uppercase tracking-widest text-xs font-bold">Próximamente nuevas historias</p>
+                 </div>
+               )}
             </div>
           </div>
         </section>
@@ -452,5 +456,89 @@ function CultureCard({ title, excerpt, image }: { title: string, excerpt: string
        <p className="text-gray-500 font-light leading-relaxed mb-6 font-sans">{excerpt}</p>
        <span className="text-orange-brand font-bold text-sm tracking-widest flex items-center gap-2 font-sans">{t("home.readMore", "LEER MÁS")} <X size={16} className="rotate-45" /></span>
     </motion.div>
+  );
+}
+
+function PromoCarousel({ images }: { images: string[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [images.length]);
+
+  return (
+    <>
+      <div 
+        className="w-full relative overflow-hidden rounded-2xl cursor-pointer shadow-inner" 
+        style={{ aspectRatio: "4/5" }}
+        onClick={() => setIsFullScreen(true)}
+      >
+        <AnimatePresence mode="wait">
+          <motion.img 
+            key={currentIndex}
+            src={images[currentIndex]} 
+            alt="Promo"
+            initial={{ opacity: 0, scale: 1.05 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            className="w-full h-full object-cover absolute inset-0"
+            referrerPolicy="no-referrer"
+          />
+        </AnimatePresence>
+        
+        {/* Indicators */}
+        <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-3 z-10 bg-gradient-to-t from-black/50 to-transparent pt-8 pb-4">
+          {images.map((_, i) => (
+            <div 
+              key={i} 
+              onClick={(e) => { e.stopPropagation(); setCurrentIndex(i); }}
+              className={`h-2 rounded-full transition-all cursor-pointer shadow-sm ${i === currentIndex ? 'bg-orange-brand w-8' : 'bg-white/60 w-2 hover:bg-white'}`} 
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Full Screen Lightbox */}
+      <AnimatePresence>
+        {isFullScreen && (
+           <motion.div 
+             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+             className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center p-4 md:p-8"
+             onClick={() => setIsFullScreen(false)}
+           >
+             <button 
+               onClick={(e) => { e.stopPropagation(); setIsFullScreen(false); }} 
+               className="absolute top-6 right-6 text-white p-3 bg-white/10 rounded-full hover:bg-orange-brand hover:scale-110 transition-all z-10 border border-white/20 shadow-2xl"
+             >
+               <X size={24} />
+             </button>
+             <motion.img 
+               initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }}
+               src={images[currentIndex]} 
+               alt="Promo Enlarge" 
+               className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl" 
+               onClick={(e) => e.stopPropagation()}
+             />
+             
+             {/* Full Screen Controls */}
+             <div className="absolute bottom-8 flex gap-4" onClick={(e) => e.stopPropagation()}>
+               {images.map((_, i) => (
+                 <button 
+                   key={i}
+                   onClick={() => setCurrentIndex(i)}
+                   className={`h-3 rounded-full transition-all ${i === currentIndex ? 'bg-orange-brand w-12' : 'bg-white/40 w-3 hover:bg-white'}`}
+                 />
+               ))}
+             </div>
+           </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
