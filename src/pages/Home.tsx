@@ -9,8 +9,10 @@ import CoffeeMatchmaker from "../components/CoffeeMatchmaker";
 import { CartItem } from "../types";
 import { X, Trash2, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 export default function Home() {
+  const { t } = useTranslation();
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartStep, setCartStep] = useState<"list" | "qr">("list");
@@ -128,20 +130,20 @@ export default function Home() {
         {/* Reservation Quick Hook */}
         <section id="reservas" className="py-24 bg-indigo-brand text-white overflow-hidden">
           <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-             <motion.div
+              <motion.div
                initial={{ opacity: 0, x: -50 }}
                whileInView={{ opacity: 1, x: 0 }}
                viewport={{ once: true }}
              >
-                <h2 className="text-6xl md:text-8xl font-extenda font-black tracking-tighter uppercase mb-6 leading-none">RESERVA <br /><span className="text-yellow-brand">TU ESPACIO</span></h2>
+                <h2 className="text-6xl md:text-8xl font-extenda font-black tracking-tighter uppercase mb-6 leading-none" dangerouslySetInnerHTML={{ __html: t("home.reserveTitle", 'RESERVA <br /><span class="text-yellow-brand">TU ESPACIO</span>') }}></h2>
                 <p className="text-indigo-100 text-lg mb-10 max-w-md font-light leading-relaxed">
-                  ¿Buscas el lugar perfecto para concentrarte? Reserva tu espacio de co-work y asegura tu productividad con el mejor café de La Paz.
+                  {t("home.reserveDesc", "¿Buscas el lugar perfecto para concentrarte? Reserva tu espacio de co-work y asegura tu productividad con el mejor café de La Paz.")}
                 </p>
                 <button 
                   onClick={() => sendOrder("reservation")}
                   className="inline-block bg-white text-indigo-brand font-bold px-10 py-5 rounded-2xl hover:bg-yellow-brand transition-colors tracking-widest text-sm active:scale-95 uppercase"
                 >
-                  RESERVAR POR WHATSAPP
+                  {t("home.reserveBtn", "RESERVAR POR WHATSAPP")}
                 </button>
              </motion.div>
              <motion.div 
@@ -171,7 +173,7 @@ export default function Home() {
                  whileInView={{ opacity: 1, x: 0 }}
                  viewport={{ once: true }}
                >
-                  <span className="text-orange-brand font-bold uppercase tracking-widest text-xs mb-4 block font-sans">Especial de Temporada</span>
+                  <span className="text-orange-brand font-bold uppercase tracking-widest text-xs mb-4 block font-sans">{t("home.seasonal", "Especial de Temporada")}</span>
                   <h2 className="text-5xl md:text-7xl font-extenda font-black tracking-tighter uppercase mb-6 text-indigo-brand leading-none">
                     {promo.title}
                   </h2>
@@ -207,13 +209,13 @@ export default function Home() {
            {!storeOpen ? (
              <div className="bg-red-500/10 border-b border-red-500/20 p-4 text-center">
                 <p className="text-red-700 font-bold text-xs uppercase tracking-widest">
-                  ⚠️ La tienda se encuentra cerrada por el momento. No estamos recibiendo pedidos.
+                  {t("home.closedMsg", "⚠️ La tienda se encuentra cerrada por el momento. No estamos recibiendo pedidos.")}
                 </p>
              </div>
            ) : !isOrderingTime() ? (
              <div className="bg-yellow-brand/10 border-b border-yellow-brand/20 p-4 text-center">
                 <p className="text-indigo-dark font-bold text-xs uppercase tracking-widest">
-                  ⚠️ Fuera de horario de pedidos (8:30 - 15:00). Consulta disponibilidad de delivery por WhatsApp.
+                  {t("home.outOfHours", "⚠️ Fuera de horario de pedidos (8:30 - 15:00). Consulta disponibilidad de delivery por WhatsApp.")}
                 </p>
              </div>
            ) : null}
@@ -224,8 +226,8 @@ export default function Home() {
         <section id="cultura" className="py-24 bg-white">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
-               <h2 className="text-6xl font-extenda font-black text-indigo-brand tracking-tighter uppercase mb-2">Cultura Indigo</h2>
-               <p className="text-gray-400 font-editorial text-xl italic tracking-tight">Historias que se cuentan en cada sorbo.</p>
+               <h2 className="text-6xl font-extenda font-black text-indigo-brand tracking-tighter uppercase mb-2">{t("home.cultureTitle", "Cultura Indigo")}</h2>
+               <p className="text-gray-400 font-editorial text-xl italic tracking-tight">{t("home.cultureSubtitle", "Historias que se cuentan en cada sorbo.")}</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -266,7 +268,7 @@ export default function Home() {
             >
               <div className="p-6 md:p-8 border-b border-gray-100 flex justify-between items-center bg-indigo-brand text-white md:rounded-none rounded-t-3xl">
                 <div>
-                  <h3 className="font-extenda font-black text-4xl uppercase tracking-tighter">TU PEDIDO</h3>
+                  <h3 className="font-extenda font-black text-4xl uppercase tracking-tighter">{t("cart.title", "TU PEDIDO")}</h3>
                   <p className="text-indigo-100 text-xs font-bold uppercase tracking-widest mt-1">Indigo Coffee Hub</p>
                 </div>
                 <button onClick={() => { setIsCartOpen(false); setCartStep("list"); }} className="p-2 hover:bg-white/10 rounded-full transition-colors">
@@ -277,11 +279,11 @@ export default function Home() {
               <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-4">
                 {!storeOpen ? (
                   <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-600 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                     ⚠️ La tienda se encuentra cerrada hoy. Por el momento no estamos recibiendo pedidos, inténtalo más tarde.
+                     {t("home.closedMsgCart", "⚠️ La tienda se encuentra cerrada hoy. Por el momento no estamos recibiendo pedidos, inténtalo más tarde.")}
                   </div>
                 ) : !isOrderingTime() ? (
                   <div className="bg-orange-brand/5 border border-orange-brand/10 p-4 rounded-xl text-orange-brand text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                     Nota: Estás pidiendo fuera del horario estándar (8:30 - 15:00). Coordinaremos tu delivery o recojo vía WhatsApp.
+                     {t("home.outOfHoursCart", "Nota: Estás pidiendo fuera del horario estándar (8:30 - 15:00). Coordinaremos tu delivery o recojo vía WhatsApp.")}
                   </div>
                 ) : null}
                 
@@ -289,7 +291,7 @@ export default function Home() {
                   cart.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center opacity-20 pt-12">
                       <ShoppingBag size={80} className="mb-4" />
-                      <p className="font-sans font-bold uppercase tracking-widest text-sm text-indigo-brand">Tu carrito está vacío</p>
+                      <p className="font-sans font-bold uppercase tracking-widest text-sm text-indigo-brand">{t("cart.empty", "Tu carrito está vacío")}</p>
                     </div>
                   ) : (
                     cart.map((item) => (
@@ -322,8 +324,7 @@ export default function Home() {
                   )
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center">
-                    <p className="text-xs font-black uppercase tracking-widest text-indigo-brand mb-6 leading-relaxed">
-                      Escanea el QR para pagar tu orden.<br/>Y prepara tu comprobante para enviarlo.
+                    <p className="text-xs font-black uppercase tracking-widest text-indigo-brand mb-6 leading-relaxed" dangerouslySetInnerHTML={{ __html: t("cart.qrScan", "Escanea el QR para pagar tu orden.<br/>Y prepara tu comprobante para enviarlo.") }}>
                     </p>
                     <img src="/indigo-qr-yape.png" alt="QR Yape" className="w-64 h-64 md:w-80 md:h-80 object-contain mb-4 rounded-2xl border border-gray-100 p-4 shadow-sm" />
                     
@@ -333,14 +334,14 @@ export default function Home() {
                       className="mb-8 text-[10px] text-indigo-brand font-bold uppercase tracking-widest hover:text-orange-brand transition-colors flex items-center gap-2 border border-indigo-brand/20 px-4 py-2 rounded-full"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                      Descargar QR
+                      {t("cart.downloadQr", "Descargar QR")}
                     </a>
 
                     <button 
                       onClick={() => setCartStep("list")}
                       className="text-[10px] text-gray-400 font-bold uppercase tracking-widest hover:text-indigo-brand transition-colors underline"
                     >
-                      Volver al detalle del pedido
+                      {t("cart.backToDetail", "Volver al detalle del pedido")}
                     </button>
                   </div>
                 )}
@@ -348,7 +349,7 @@ export default function Home() {
 
               <div className="p-6 md:p-8 bg-gray-50 border-t border-gray-100">
                 <div className="flex justify-between items-end mb-6">
-                   <span className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">Subtotal a Pagar</span>
+                   <span className="text-gray-400 font-bold uppercase tracking-[0.2em] text-[10px]">{t("cart.subtotal", "Subtotal a Pagar")}</span>
                    <span className="font-sans font-black text-3xl md:text-5xl text-indigo-brand">Bs {total.toFixed(2)}</span>
                 </div>
 
@@ -358,7 +359,7 @@ export default function Home() {
                     disabled={cart.length === 0 || !storeOpen}
                     className="w-full bg-indigo-brand hover:bg-orange-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-indigo-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
-                    CONFIRMAR PEDIDO
+                    {t("cart.confirm", "CONFIRMAR PEDIDO")}
                   </button>
                 ) : (
                   <button 
@@ -366,7 +367,7 @@ export default function Home() {
                     disabled={cart.length === 0 || !storeOpen}
                     className="w-full bg-orange-brand hover:bg-indigo-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-orange-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
-                    {isOrderingTime() ? "FINALIZAR PEDIDO (WHATSAPP)" : "CONSULTAR DISPONIBILIDAD"}
+                    {isOrderingTime() ? t("cart.checkout", "FINALIZAR PEDIDO (WHATSAPP)") : t("cart.checkAvailability", "CONSULTAR DISPONIBILIDAD")}
                   </button>
                 )}
 
@@ -374,7 +375,7 @@ export default function Home() {
                   onClick={() => { clearCart(); setCartStep("list"); }}
                   className="w-full text-gray-400 hover:text-red-500 text-[10px] font-black uppercase tracking-widest mt-4 transition-colors"
                 >
-                  Vaciar Carrito
+                  {t("cart.clear", "Vaciar Carrito")}
                 </button>
               </div>
             </motion.div>
@@ -402,7 +403,7 @@ export default function Home() {
                  </button>
                  
                  <div className="max-w-2xl w-full flex flex-col gap-8 mt-16 md:mt-8 pb-24">
-                   <h2 className="text-4xl md:text-5xl font-extenda font-black text-white text-center tracking-tighter uppercase mb-4">NUESTRO <span className="text-orange-brand">MENÚ</span></h2>
+                   <h2 className="text-4xl md:text-5xl font-extenda font-black text-white text-center tracking-tighter uppercase mb-4" dangerouslySetInnerHTML={{ __html: t("menu.title", 'NUESTRO <span class="text-orange-brand italic">Menú</span>') }}></h2>
                    <img src="/menuanv.png" alt="Menu Anverso" className="w-full rounded-2xl shadow-2xl border-4 border-white/10" />
                  </div>
               </div>
@@ -424,7 +425,7 @@ export default function Home() {
               onClick={() => setIsCartOpen(true)}
               className="pointer-events-auto w-full max-w-sm bg-orange-brand text-white px-8 py-4 rounded-full font-bold tracking-[0.2em] uppercase text-xs shadow-2xl shadow-orange-brand/30 flex items-center justify-between border-2 border-white/20 active:scale-95 transition-transform"
             >
-              <span className="flex items-center gap-2"><ShoppingBag size={18} /> VER PEDIDO ({cart.length})</span>
+              <span className="flex items-center gap-2"><ShoppingBag size={18} /> {t("cart.viewOrder", "VER PEDIDO")} ({cart.length})</span>
               <span>Bs {total.toFixed(2)}</span>
             </button>
           </motion.div>

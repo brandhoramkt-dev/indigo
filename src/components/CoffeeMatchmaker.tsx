@@ -1,17 +1,27 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { ai, SYSTEM_PROMPT } from "../lib/gemini";
+import { ai, getSystemPrompt } from "../lib/gemini";
+import { useTranslation } from "react-i18next";
+import { useFirestoreCollection } from "../lib/hooks";
+import { Product, CartItem } from "../types";
+import React from "react";
 
 interface Message {
   role: "user" | "model";
   content: string;
 }
 
-export default function CoffeeMatchmaker() {
+interface CoffeeMatchmakerProps {
+  onAddToCart?: (item: CartItem) => void;
+}
+
+export default function CoffeeMatchmaker({ onAddToCart }: CoffeeMatchmakerProps) {
+  const { t, i18n } = useTranslation();
+  const { data: products } = useFirestoreCollection<Product>("products");
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { role: "model", content: "¡Hola! Soy tu barista virtual de Indigo Coffee. ¿Qué tipo de sabores te gustan en tu café?" }
+    { role: "model", content: t("matchmaker.greeting", "¡Hola! Soy tu barista virtual de Indigo Coffee. ¿Qué tipo de sabores te gustan en tu café?") }
   ]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,10 +47,12 @@ export default function CoffeeMatchmaker() {
         parts: [{ text: m.content }]
       }));
 
+      const systemPrompt = getSystemPrompt(i18n.language, products);
+
       // Create a new chat session to maintain context if supported, 
       // but since we are using generateContent, we pass the entire history.
       const contents = [
-        { role: "user", parts: [{ text: SYSTEM_PROMPT }] },
+        { role: "user", parts: [{ text: systemPrompt }] },
         { role: "model", parts: [{ text: "Entendido, actuaré como el barista." }] },
         ...chatHistory,
         { role: "user", parts: [{ text: userMessage }] }
@@ -51,11 +63,11 @@ export default function CoffeeMatchmaker() {
         contents: contents,
       });
 
-      const textResponse = response.text || "Lo siento, tuve un problema preparando tu recomendación. ¿Podrías repetirlo?";
+      const textResponse = response.text || t("matchmaker.error", "Lo siento, tuve un problema preparando tu recomendación. ¿Podrías repetirlo?");
       setMessages((prev) => [...prev, { role: "model", content: textResponse }]);
     } catch (error) {
       console.error("Error with Gemini API:", error);
-      setMessages((prev) => [...prev, { role: "model", content: "Lo siento, tuve un problema de conexión. ¿Podemos intentarlo de nuevo?" }]);
+      setMessages((prev) => [...prev, { role: "model", content: t("matchmaker.networkError", "Lo siento, tuve un problema de conexión. ¿Podemos intentarlo de nuevo?") }]);
     } finally {
       setIsLoading(false);
     }
@@ -93,8 +105,8 @@ export default function CoffeeMatchmaker() {
                   <Bot size={20} className="text-yellow-brand" />
                 </div>
                 <div>
-                  <h3 className="font-extenda font-black text-xl uppercase tracking-tighter leading-none">Indigo Matchmaker</h3>
-                  <p className="text-[10px] text-indigo-100 uppercase tracking-widest font-bold mt-1">Tu Barista Virtual</p>
+                  <h3 className="font-extenda font-black text-xl uppercase tracking-tighter leading-none">{t("matchmaker.title", "Indigo Matchmaker")}</h3>
+                  <p className="text-[10px] text-indigo-100 uppercase tracking-widest font-bold mt-1">{t("matchmaker.subtitle", "Tu Barista Virtual")}</p>
                 </div>
               </div>
               <button 
@@ -123,7 +135,45 @@ export default function CoffeeMatchmaker() {
                           : "bg-white border border-gray-100 text-gray-600 rounded-tl-sm shadow-sm"
                       }`}
                     >
-                      {msg.content}
+                      {msg.role === "user" ? (
+                        msg.content
+                      ) : (
+                        (() => {
+                          const content = msg.content;
+                          const productMatch = content.match(/\[PRODUCT:([^\]]+)\]/);
+                          const productId = productMatch ? productMatch[1] : null;
+                          const cleanText = content.replace(/\[PRODUCT:.*?\]/g, '').trim();
+
+                          const parts = cleanText.split(/(\*\*.*?\*\*)/g);
+                          const renderedText = parts.map((part, i) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                              return <strong key={i}>{part.slice(2, -2)}</strong>;
+                            }
+                            return <span key={i}>{part}</span>;
+                          });
+
+                          const recommendedProduct = productId ? products.find(p => p.id === productId) : null;
+
+                          return (
+                            <div className="flex flex-col gap-2">
+                              <div>{renderedText}</div>
+                              {recommendedProduct && onAddToCart && (
+                                <button 
+                                  onClick={() => onAddToCart({ 
+                                    ...recommendedProduct, 
+                                    uniqueId: Math.random().toString(36), 
+                                    finalPrice: recommendedProduct.price 
+                                  })}
+                                  className="mt-3 text-[10px] md:text-xs bg-indigo-brand text-white hover:bg-orange-brand transition-colors px-4 py-3 rounded-xl w-full font-bold uppercase tracking-widest active:scale-95 flex flex-col items-center justify-center gap-1"
+                                >
+                                  <span>{t("menu.addSpecific", { name: recommendedProduct.name.toUpperCase(), defaultValue: `AGREGAR ${recommendedProduct.name.toUpperCase()}` })}</span>
+                                  <span className="text-white/80">Bs {recommendedProduct.price}</span>
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })()
+                      )}
                     </div>
                   </div>
                 </div>
@@ -154,7 +204,7 @@ export default function CoffeeMatchmaker() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  placeholder="Dime cómo te gusta el café..."
+                  placeholder={t("matchmaker.placeholder", "Dime cómo te gusta el café...")}
                   className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-brand/20 focus:border-indigo-brand transition-all"
                 />
                 <button

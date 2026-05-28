@@ -5,8 +5,10 @@ import { motion, AnimatePresence } from "motion/react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import { Plus, Minus, Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (item: CartItem) => void, disabled?: boolean }) {
+  const { t } = useTranslation();
   const { data: products, loading } = useFirestoreCollection<Product>("products");
   const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean).sort();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -42,8 +44,8 @@ export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (i
     <section id="menu" className="py-24 px-6 max-w-7xl mx-auto min-h-[600px]">
       <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
         <div>
-          <span className="text-orange-brand font-bold uppercase tracking-widest text-xs mb-2 block font-sans">Selección de Barista</span>
-          <h2 className="text-5xl md:text-7xl font-extenda font-black text-indigo-brand tracking-tighter uppercase leading-none">NUESTRO <span className="text-orange-brand italic">Menú</span></h2>
+          <span className="text-orange-brand font-bold uppercase tracking-widest text-xs mb-2 block font-sans">{t("menu.barista", "Selección de Barista")}</span>
+          <h2 className="text-5xl md:text-7xl font-extenda font-black text-indigo-brand tracking-tighter uppercase leading-none" dangerouslySetInnerHTML={{ __html: t("menu.title", 'NUESTRO <span class="text-orange-brand italic">Menú</span>') }}></h2>
         </div>
       </div>
 
@@ -59,7 +61,7 @@ export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (i
               onClick={() => setIsMenuExpanded(true)}
               className="bg-indigo-brand hover:bg-orange-brand text-white font-bold py-6 px-12 rounded-[2rem] text-sm md:text-base tracking-[0.2em] transition-all shadow-2xl active:scale-95 flex items-center gap-4 uppercase"
             >
-              VER MENÚ Y REALIZAR PEDIDO <Plus size={24} />
+              {t("menu.viewAndOrder", "VER MENÚ Y REALIZAR PEDIDO")} <Plus size={24} />
             </button>
           </motion.div>
         ) : (
@@ -102,7 +104,7 @@ export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (i
                animate={{ opacity: 1 }}
                className="col-span-full text-center py-24 bg-white rounded-[2.5rem] border border-dashed border-gray-200"
              >
-                <p className="text-gray-400 font-sans font-bold uppercase tracking-[0.2em] text-[10px]">Próximamente: Delicias en esta categoría</p>
+                <p className="text-gray-400 font-sans font-bold uppercase tracking-[0.2em] text-[10px]">{t("menu.comingSoon", "Próximamente: Delicias en esta categoría")}</p>
              </motion.div>
           )}
         </motion.div>
@@ -125,6 +127,7 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
   const [temp, setTemp] = useState<"Caliente" | "Frío">("Caliente");
   const [essence, setEssence] = useState<string>("");
   const [milk, setMilk] = useState<string>("");
+  const { t } = useTranslation();
 
   return (
     <motion.div
@@ -147,13 +150,13 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
       <div className="space-y-3 font-sans mt-auto">
         {product.hasTemperatureOptions && (
           <div className="flex gap-2 p-1 bg-gray-50 rounded-2xl">
-            {(["Caliente", "Frío"] as const).map(t => (
+            {(["Caliente", "Frío"] as const).map(t_opt => (
               <button
-                key={t}
-                onClick={() => setTemp(t)}
-                className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all ${temp === t ? "bg-white text-indigo-brand shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
+                key={t_opt}
+                onClick={() => setTemp(t_opt)}
+                className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl transition-all ${temp === t_opt ? "bg-white text-indigo-brand shadow-sm" : "text-gray-400 hover:text-gray-600"}`}
               >
-                {t}
+                {t_opt === "Caliente" ? t("menu.hot", "Caliente") : t("menu.cold", "Frío")}
               </button>
             ))}
           </div>
@@ -161,13 +164,13 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
 
         {product.hasMilkOptions && menuOptions.milks.length > 0 && (
           <div className="bg-gray-50 rounded-xl px-3 py-2 mt-2">
-             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">Elige tu leche:</span>
+             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">{t("menu.chooseMilk", "Elige tu leche:")}</span>
              <select 
                value={milk} 
                onChange={(e) => setMilk(e.target.value)}
                className="w-full bg-transparent text-[10px] font-bold uppercase tracking-wider text-indigo-brand focus:outline-none cursor-pointer"
              >
-               <option value="">Selecciona...</option>
+               <option value="">{t("menu.select", "Selecciona...")}</option>
                {menuOptions.milks.map(m => <option key={m} value={m}>{m}</option>)}
              </select>
           </div>
@@ -175,12 +178,13 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
 
         {product.hasEssenceOptions && menuOptions.essences.length > 0 && (
           <div className="bg-gray-50 rounded-xl px-3 py-2 mt-2">
-             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">Elige tu esencia:</span>
+             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">{t("menu.chooseEssence", "Elige tu esencia:")}</span>
              <select 
                value={essence} 
                onChange={(e) => setEssence(e.target.value)}
                className="w-full bg-transparent text-[10px] font-bold uppercase tracking-wider text-indigo-brand focus:outline-none cursor-pointer"
              >
+               <option value="">{t("menu.select", "Selecciona...")}</option>
                {menuOptions.essences.map(e => <option key={e} value={e === "Sin Esencia" ? "" : e}>{e}</option>)}
              </select>
           </div>
@@ -200,16 +204,16 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
         >
           {product.available ? (
             <>
-              AGREGAR AL PEDIDO
+              {t("menu.add", "AGREGAR AL PEDIDO")}
               <Plus size={16} />
             </>
-          ) : "AGOTADO"}
+          ) : t("menu.soldOut", "AGOTADO")}
         </button>
       </div>
       
       {!product.available && (
         <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] flex items-center justify-center">
-           <span className="bg-gray-900 text-white px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">Temporalmente Agotado</span>
+           <span className="bg-gray-900 text-white px-4 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase">{t("menu.temporarilySoldOut", "Temporalmente Agotado")}</span>
         </div>
       )}
     </motion.div>

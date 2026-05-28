@@ -3,11 +3,13 @@ import { Link } from "react-router-dom";
 import { Coffee, ShoppingBag, Menu, X, Instagram, Facebook } from "lucide-react";
 import { useAuth } from "../lib/AuthContext";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslation } from "react-i18next";
 
 export default function Navbar({ cartCount, onOpenCart }: { cartCount: number, onOpenCart: () => void }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -16,10 +18,9 @@ export default function Navbar({ cartCount, onOpenCart }: { cartCount: number, o
   }, []);
 
   const navLinks = [
-    { name: "Inicio", href: "#home" },
-    { name: "Menú", href: "#menu" },
-    { name: "Reservas", href: "#reservas" },
-    { name: "Cultura", href: "#cultura" },
+    { name: t("nav.menu", "Menú"), href: "#menu" },
+    { name: t("nav.reservations", "Reservas"), href: "#reservas" },
+    { name: t("nav.culture", "Cultura"), href: "#cultura" },
   ];
 
   return (

@@ -1,0 +1,78 @@
+{
+  "translation": {
+    "nav": {
+      "menu": "Menú",
+      "culture": "Cultura",
+      "reservations": "Reservas",
+      "about": "Nosotros",
+      "admin": "Ir al Panel"
+    },
+    "hero": {
+      "hub": "El Hub",
+      "creative": "Creative Coffee",
+      "subtitle": "Un espacio diseñado para creadores, soñadores y amantes del buen café.",
+      "viewMenu": "VER EL MENÚ"
+    },
+    "home": {
+      "reserveTitle": "RESERVA <br /><span class=\"text-yellow-brand\">TU ESPACIO</span>",
+      "reserveDesc": "¿Buscas el lugar perfecto para concentrarte? Reserva tu espacio de co-work y asegura tu productividad con el mejor café de La Paz.",
+      "reserveBtn": "RESERVAR POR WHATSAPP",
+      "seasonal": "Especial de Temporada",
+      "closedMsg": "⚠️ La tienda se encuentra cerrada por el momento. No estamos recibiendo pedidos.",
+      "closedMsgCart": "⚠️ La tienda se encuentra cerrada hoy. Por el momento no estamos recibiendo pedidos, inténtalo más tarde.",
+      "outOfHours": "⚠️ Fuera de horario de pedidos (8:30 - 15:00). Consulta disponibilidad de delivery por WhatsApp.",
+      "outOfHoursCart": "Nota: Estás pidiendo fuera del horario estándar (8:30 - 15:00). Coordinaremos tu delivery o recojo vía WhatsApp.",
+      "cultureTitle": "Cultura Indigo",
+      "cultureSubtitle": "Historias que se cuentan en cada sorbo.",
+      "readMore": "LEER MÁS"
+    },
+    "cart": {
+      "title": "TU PEDIDO",
+      "empty": "Tu carrito está vacío",
+      "qrScan": "Escanea el QR para pagar tu orden.<br/>Y prepara tu comprobante para enviarlo.",
+      "downloadQr": "Descargar QR",
+      "backToDetail": "Volver al detalle del pedido",
+      "subtotal": "Subtotal a Pagar",
+      "confirm": "CONFIRMAR PEDIDO",
+      "checkout": "FINALIZAR PEDIDO (WHATSAPP)",
+      "checkAvailability": "CONSULTAR DISPONIBILIDAD",
+      "clear": "Vaciar Carrito",
+      "viewOrder": "VER PEDIDO"
+    },
+    "menu": {
+      "barista": "Selección de Barista",
+      "title": "NUESTRO <span class=\"text-orange-brand italic\">Menú</span>",
+      "viewAndOrder": "VER MENÚ Y REALIZAR PEDIDO",
+      "comingSoon": "Próximamente: Delicias en esta categoría",
+      "hot": "Caliente",
+      "cold": "Frío",
+      "chooseMilk": "Elige tu leche:",
+      "chooseEssence": "Elige tu esencia:",
+      "select": "Selecciona...",
+      "add": "AGREGAR AL PEDIDO",
+      "soldOut": "AGOTADO",
+      "temporarilySoldOut": "Temporalmente Agotado",
+      "addSpecific": "AGREGAR {{name}}"
+    },
+    "footer": {
+      "description": "Más que un café, somos un punto de encuentro para creativos en La Paz.",
+      "followUs": "Síguenos",
+      "hours": "Horarios",
+      "monFri": "Lunes a Viernes: 8:30 - 20:00",
+      "sat": "Sábados: 9:00 - 18:00",
+      "sun": "Domingos: Cerrado",
+      "legal": "Legal",
+      "terms": "Términos y Condiciones",
+      "privacy": "Políticas de Privacidad",
+      "rights": "Todos los derechos reservados."
+    },
+    "matchmaker": {
+      "greeting": "¡Hola! Soy tu barista virtual de Indigo Coffee. ¿Qué tipo de sabores te gustan en tu café?",
+      "title": "Indigo Matchmaker",
+      "subtitle": "Tu Barista Virtual",
+      "placeholder": "Dime cómo te gusta el café...",
+      "error": "Lo siento, tuve un problema preparando tu recomendación. ¿Podrías repetirlo?",
+      "networkError": "Lo siento, tuve un problema de conexión. ¿Podemos intentarlo de nuevo?"
+    }
+  }
+}

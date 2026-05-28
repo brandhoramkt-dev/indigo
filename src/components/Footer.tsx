@@ -1,7 +1,9 @@
 import { Coffee, Instagram, Facebook, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Footer() {
+  const { t } = useTranslation();
   return (
     <footer className="bg-indigo-dark text-white pt-24 pb-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -14,7 +16,7 @@ export default function Footer() {
               <span className="font-extenda font-black text-2xl tracking-tighter uppercase">INDIGO</span>
             </div>
             <p className="text-white/40 text-sm leading-relaxed mb-8 max-w-xs font-sans">
-              Tu hogar fuera de casa en el corazón de La Paz. Café de especialidad, comunidad y el espacio que necesitas para crear.
+              {t("footer.description", "Tu hogar fuera de casa en el corazón de La Paz. Café de especialidad, comunidad y el espacio que necesitas para crear.")}
             </p>
             <div className="flex gap-4">
               <a href="https://www.instagram.com/indigo.coffee.bo" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center hover:bg-white hover:text-indigo-dark transition-all">
@@ -32,19 +34,19 @@ export default function Footer() {
 
           
           <div>
-             <h4 className="font-extenda font-bold uppercase tracking-widest text-xs text-yellow-brand mb-8">Horarios</h4>
+             <h4 className="font-extenda font-bold uppercase tracking-widest text-xs text-yellow-brand mb-8">{t("footer.hours", "Horarios")}</h4>
              <ul className="space-y-4 text-white/60 text-sm font-sans">
-                <li className="flex justify-between"><span>Lun - Vie</span> <span>08:00 - 21:00</span></li>
-                <li className="flex justify-between"><span>Sáb - Dom</span> <span>09:00 - 17:00</span></li>
+                <li className="flex justify-between"><span>{t("footer.monFri", "Lun - Vie")}</span> <span>08:00 - 21:00</span></li>
+                <li className="flex justify-between"><span>{t("footer.satSun", "Sáb - Dom")}</span> <span>09:00 - 17:00</span></li>
              </ul>
           </div>
 
           <div>
-             <h4 className="font-extenda font-bold uppercase tracking-widest text-xs text-yellow-brand mb-8">Ubicación</h4>
+             <h4 className="font-extenda font-bold uppercase tracking-widest text-xs text-yellow-brand mb-8">{t("footer.location", "Ubicación")}</h4>
              <a href="https://maps.app.goo.gl/F4Xfnf9PK2kkyTvp8" target="_blank" rel="noopener noreferrer" className="block text-white/60 text-sm leading-relaxed mb-4 font-sans hover:text-white transition-colors">
                 Calle 18 de Calacoto, San Miguel.<br />
                 La Paz, Bolivia.<br />
-                <span className="text-orange-brand font-bold text-xs mt-2 inline-block">Ver en Google Maps →</span>
+                <span className="text-orange-brand font-bold text-xs mt-2 inline-block">{t("footer.viewMap", "Ver en Google Maps →")}</span>
              </a>
              <p className="text-white/60 text-sm font-sans mb-6">
                 <span className="block font-bold mb-1">WhatsApp:</span>
@@ -66,10 +68,10 @@ export default function Footer() {
         </div>
 
         <div className="pt-12 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] uppercase tracking-widest font-bold text-white/20">
-          <p>© 2026 Indigo Coffee. Todos los derechos reservados.</p>
+          <p>© 2026 Indigo Coffee. {t("footer.rights", "Todos los derechos reservados.")}</p>
           <div className="flex gap-8">
-            <Link to="/privacidad" className="hover:text-white transition-colors">Privacidad</Link>
-            <Link to="/terminos" className="hover:text-white transition-colors">Términos</Link>
+            <Link to="/privacidad" className="hover:text-white transition-colors">{t("footer.privacy", "Privacidad")}</Link>
+            <Link to="/terminos" className="hover:text-white transition-colors">{t("footer.terms", "Términos")}</Link>
           </div>
         </div>
       </div>
