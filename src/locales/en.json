@@ -8,10 +8,11 @@
       "admin": "Admin Panel"
     },
     "hero": {
-      "hub": "The Hub",
-      "creative": "Creative Coffee",
-      "subtitle": "A space designed for creators, dreamers, and lovers of good coffee.",
-      "viewMenu": "VIEW MENU"
+      "subtitle": "Your space, your pace",
+      "desc": "Forget the lines. Your favorite drink ready whenever you want. Book your ideal table to work or chat.",
+      "order": "ORDER",
+      "viewMenu": "VIEW MENU",
+      "book": "BOOK"
     },
     "home": {
       "reserveTitle": "BOOK <br /><span class=\"text-yellow-brand\">YOUR SPACE</span>",
@@ -24,6 +25,10 @@
       "outOfHoursCart": "Note: You are ordering outside standard hours (8:30 - 15:00). We will coordinate your delivery or pickup via WhatsApp.",
       "cultureTitle": "Indigo Culture",
       "cultureSubtitle": "Stories told in every sip.",
+      "culture1Title": "The Origin of the Bean",
+      "culture1Desc": "Bolivia has unique altitudes that give our coffee chocolate and citrus notes impossible to replicate...",
+      "culture2Title": "Art in the Space",
+      "culture2Desc": "More than a coffee shop, we are a meeting point for creatives, digital nomads, and dreamers in La Paz...",
       "readMore": "READ MORE"
     },
     "cart": {

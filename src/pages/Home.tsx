@@ -232,13 +232,13 @@ export default function Home() {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                <CultureCard 
-                 title="El Origen del Grano"
-                 excerpt="Bolivia tiene alturas únicas que dan a nuestro café notas de chocolate y cítricos imposibles de replicar..."
+                 title={t("home.culture1Title", "El Origen del Grano")}
+                 excerpt={t("home.culture1Desc", "Bolivia tiene alturas únicas que dan a nuestro café notas de chocolate y cítricos imposibles de replicar...")}
                  image="https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=2070&auto=format&fit=crop"
                />
                <CultureCard 
-                 title="Arte en el Espacio"
-                 excerpt="Más que un café, somos un punto de encuentro para creativos, nómadas digitales y soñadores de La Paz..."
+                 title={t("home.culture2Title", "Arte en el Espacio")}
+                 excerpt={t("home.culture2Desc", "Más que un café, somos un punto de encuentro para creativos, nómadas digitales y soñadores de La Paz...")}
                  image="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2047&auto=format&fit=crop"
                />
             </div>
@@ -438,6 +438,7 @@ export default function Home() {
 }
 
 function CultureCard({ title, excerpt, image }: { title: string, excerpt: string, image: string }) {
+  const { t } = useTranslation();
   return (
     <motion.div 
       whileHover={{ y: -5 }}
@@ -449,7 +450,7 @@ function CultureCard({ title, excerpt, image }: { title: string, excerpt: string
        </div>
        <h3 className="font-extenda font-black text-3xl text-indigo-brand uppercase group-hover:text-orange-brand transition-colors mb-4">{title}</h3>
        <p className="text-gray-500 font-light leading-relaxed mb-6 font-sans">{excerpt}</p>
-       <span className="text-orange-brand font-bold text-sm tracking-widest flex items-center gap-2 font-sans">LEER MÁS <X size={16} className="rotate-45" /></span>
+       <span className="text-orange-brand font-bold text-sm tracking-widest flex items-center gap-2 font-sans">{t("home.readMore", "LEER MÁS")} <X size={16} className="rotate-45" /></span>
     </motion.div>
   );
 }

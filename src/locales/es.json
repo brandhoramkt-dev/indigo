@@ -8,10 +8,11 @@
       "admin": "Ir al Panel"
     },
     "hero": {
-      "hub": "El Hub",
-      "creative": "Creative Coffee",
-      "subtitle": "Un espacio diseñado para creadores, soñadores y amantes del buen café.",
-      "viewMenu": "VER EL MENÚ"
+      "subtitle": "Tu espacio, tu ritmo",
+      "desc": "Olvídate de las filas. Tu bebida favorita lista cuando tú quieras. Reserva tu mesa ideal para trabajar o charlar.",
+      "order": "ORDENAR",
+      "viewMenu": "VER MENÚ",
+      "book": "RESERVAR"
     },
     "home": {
       "reserveTitle": "RESERVA <br /><span class=\"text-yellow-brand\">TU ESPACIO</span>",
@@ -24,6 +25,10 @@
       "outOfHoursCart": "Nota: Estás pidiendo fuera del horario estándar (8:30 - 15:00). Coordinaremos tu delivery o recojo vía WhatsApp.",
       "cultureTitle": "Cultura Indigo",
       "cultureSubtitle": "Historias que se cuentan en cada sorbo.",
+      "culture1Title": "El Origen del Grano",
+      "culture1Desc": "Bolivia tiene alturas únicas que dan a nuestro café notas de chocolate y cítricos imposibles de replicar...",
+      "culture2Title": "Arte en el Espacio",
+      "culture2Desc": "Más que un café, somos un punto de encuentro para creativos, nómadas digitales y soñadores de La Paz...",
       "readMore": "LEER MÁS"
     },
     "cart": {
