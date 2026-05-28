@@ -4,13 +4,18 @@ import { Product, Category, CartItem } from "../types";
 import { motion, AnimatePresence } from "motion/react";
 import { doc, onSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import { Plus, Minus, Info } from "lucide-react";
+import { Plus, Minus, Info, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { translateProducts } from "../lib/translator";
 
 export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (item: CartItem) => void, disabled?: boolean }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: products, loading } = useFirestoreCollection<Product>("products");
-  const categories = Array.from(new Set(products.map(p => p.category))).filter(Boolean).sort();
+  
+  const [translatedProducts, setTranslatedProducts] = useState<Product[]>([]);
+  const [isTranslating, setIsTranslating] = useState(false);
+  
+  const categories = Array.from(new Set(translatedProducts.map(p => p.category))).filter(Boolean).sort();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [hasAutoSelected, setHasAutoSelected] = useState(false);
   const [isMenuExpanded, setIsMenuExpanded] = useState(false);
@@ -28,17 +33,39 @@ export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (i
     return () => unsubscribe();
   }, []);
 
+  // Translate products dynamically
+  useEffect(() => {
+    if (loading || products.length === 0) return;
+    
+    let isMounted = true;
+    const runTranslation = async () => {
+      if (i18n.language.startsWith("es")) {
+        setTranslatedProducts(products);
+      } else {
+        setIsTranslating(true);
+        const result = await translateProducts(products, i18n.language);
+        if (isMounted) {
+          setTranslatedProducts(result);
+          setIsTranslating(false);
+        }
+      }
+    };
+    
+    runTranslation();
+    return () => { isMounted = false; };
+  }, [products, loading, i18n.language]);
+
   // Auto-select first category that has products if current one is empty (only on first load)
   useEffect(() => {
-    if (!loading && products.length > 0 && !hasAutoSelected) {
+    if (!loading && !isTranslating && translatedProducts.length > 0 && !hasAutoSelected) {
       if (!selectedCategory || !categories.includes(selectedCategory)) {
         setSelectedCategory(categories[0] || "");
       }
       setHasAutoSelected(true);
     }
-  }, [loading, products.length, hasAutoSelected, selectedCategory, categories]);
+  }, [loading, isTranslating, translatedProducts.length, hasAutoSelected, selectedCategory, categories]);
 
-  const filteredProducts = products.filter(p => p.category === selectedCategory);
+  const filteredProducts = translatedProducts.filter(p => p.category === selectedCategory);
 
   return (
     <section id="menu" className="py-24 px-6 max-w-7xl mx-auto min-h-[600px]">
@@ -82,11 +109,10 @@ export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (i
           ))}
         </div>
 
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5, 6].map(i => (
-            <div key={i} className="bg-white rounded-2xl p-6 h-48 animate-pulse border border-gray-100"></div>
-          ))}
+      {loading || isTranslating ? (
+        <div className="flex flex-col items-center justify-center py-12 gap-4">
+          <Loader2 className="animate-spin text-orange-brand" size={48} />
+          {isTranslating && <p className="text-gray-400 font-bold uppercase tracking-widest text-xs animate-pulse">Translating menu with AI...</p>}
         </div>
       ) : (
         <motion.div 
