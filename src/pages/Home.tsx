@@ -14,6 +14,7 @@ import { useFirestoreCollection } from "../lib/hooks";
 import { BlogPost } from "../types";
 import { Helmet } from "react-helmet-async";
 import { translateContent } from "../lib/translator";
+import ReactMarkdown from "react-markdown";
 
 export default function Home() {
   const { t, i18n } = useTranslation();
@@ -208,9 +209,16 @@ export default function Home() {
                   <h2 className="text-5xl md:text-7xl font-extenda font-black tracking-tighter uppercase mb-6 text-indigo-brand leading-none">
                     {(translatedPromo || promo).title}
                   </h2>
-                  <p className="text-gray-500 text-lg mb-10 max-w-md font-light leading-relaxed font-sans whitespace-pre-line">
-                    {(translatedPromo || promo).text}
-                  </p>
+                  <div className="text-gray-500 text-lg mb-10 max-w-md font-light leading-relaxed font-sans whitespace-pre-line">
+                    <ReactMarkdown
+                      components={{
+                        a: ({node, ...props}) => <a {...props} className="text-orange-brand font-bold hover:underline transition-all" target="_blank" rel="noopener noreferrer" />,
+                        strong: ({node, ...props}) => <strong {...props} className="font-bold text-indigo-brand" />
+                      }}
+                    >
+                      {(translatedPromo || promo).text}
+                    </ReactMarkdown>
+                  </div>
                </motion.div>
                <motion.div 
                  initial={{ opacity: 0, scale: 0.8 }}
@@ -507,8 +515,16 @@ function CultureCard({ title, excerpt, content, image }: { title: string, excerp
             </div>
             <div className="max-w-3xl mx-auto px-6 py-16 -mt-20 relative z-10 bg-white rounded-t-[3rem] shadow-2xl">
               <h2 className="text-5xl md:text-7xl font-extenda font-black text-indigo-brand uppercase mb-8 leading-none tracking-tighter">{title}</h2>
-              <div className="prose prose-lg prose-indigo max-w-none text-gray-600 font-serif leading-relaxed whitespace-pre-wrap">
-                {content}
+              <div className="max-w-none text-gray-600 font-serif leading-relaxed whitespace-pre-wrap">
+                <ReactMarkdown
+                  components={{
+                    a: ({node, ...props}) => <a {...props} className="text-indigo-brand font-bold underline hover:text-orange-brand transition-colors" target="_blank" rel="noopener noreferrer" />,
+                    strong: ({node, ...props}) => <strong {...props} className="font-black text-indigo-dark" />,
+                    em: ({node, ...props}) => <em {...props} className="italic text-gray-500" />
+                  }}
+                >
+                  {content}
+                </ReactMarkdown>
               </div>
             </div>
           </motion.div>

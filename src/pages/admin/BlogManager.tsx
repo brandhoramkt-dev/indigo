@@ -106,6 +106,7 @@ export default function BlogManager() {
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Contenido</label>
                   <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={6} required className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" />
+                  <p className="text-[10px] text-gray-400 mt-2">Puedes usar formato usando código: **negrita**, *cursiva*, [texto del link](https://ejemplo.com)</p>
                 </div>
                 <div className="flex gap-4 pt-4">
                   <button type="button" onClick={resetForm} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-400 font-bold py-4 rounded-2xl uppercase tracking-widest text-xs">Cancelar</button>

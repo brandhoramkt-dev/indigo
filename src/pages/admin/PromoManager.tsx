@@ -106,6 +106,7 @@ export default function PromoManager() {
               placeholder="Refresca tu tarde con nuestra nueva línea de bebidas heladas..."
               className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" 
             />
+            <p className="text-[10px] text-gray-400 mt-2">Puedes usar formato: **negrita**, *cursiva*, [texto del link](https://ejemplo.com)</p>
           </div>
 
           <div>
