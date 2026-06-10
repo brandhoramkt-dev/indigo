@@ -18,7 +18,16 @@ export async function translateProducts(products: Product[], targetLanguage: str
     const cached = localStorage.getItem(`${CACHE_KEY}${langKey}_${product.id}`);
     if (cached) {
       try {
-        translatedProducts.push({ ...product, ...JSON.parse(cached) });
+        const parsed = JSON.parse(cached);
+        // Check if original content has changed (cache invalidation)
+        if (parsed.original && 
+            parsed.original.name === product.name && 
+            parsed.original.description === product.description &&
+            parsed.original.category === product.category) {
+          translatedProducts.push({ ...product, ...parsed.translation });
+        } else {
+          productsToTranslate.push(product);
+        }
       } catch(e) {
         productsToTranslate.push(product);
       }
@@ -72,11 +81,18 @@ ${JSON.stringify(payload, null, 2)}
           category: translation.category || originalProduct.category
         };
         
-        // Cache it
+        // Cache it with original text to detect future changes
         localStorage.setItem(`${CACHE_KEY}${langKey}_${originalProduct.id}`, JSON.stringify({
-          name: translatedProduct.name,
-          description: translatedProduct.description,
-          category: translatedProduct.category
+          translation: {
+            name: translatedProduct.name,
+            description: translatedProduct.description,
+            category: translatedProduct.category
+          },
+          original: {
+            name: originalProduct.name,
+            description: originalProduct.description,
+            category: originalProduct.category
+          }
         }));
 
         translatedProducts.push(translatedProduct);
@@ -116,7 +132,27 @@ export async function translateContent<T extends { id: string }>(
     const cached = localStorage.getItem(`${CACHE_KEY}${cacheKeyPrefix}_${langKey}_${item.id}`);
     if (cached) {
       try {
-        translatedItems.push({ ...item, ...JSON.parse(cached) });
+        const parsed = JSON.parse(cached);
+        
+        // Cache invalidation: check if original fields match
+        let hasChanged = false;
+        if (parsed.original) {
+          for (const field of fieldsToTranslate) {
+            if (parsed.original[field] !== (item as any)[field]) {
+              hasChanged = true;
+              break;
+            }
+          }
+        } else {
+          // Old cache format
+          hasChanged = true;
+        }
+
+        if (hasChanged) {
+          itemsToTranslate.push(item);
+        } else {
+          translatedItems.push({ ...item, ...parsed.translation });
+        }
       } catch(e) {
         itemsToTranslate.push(item);
       }
@@ -168,7 +204,16 @@ ${JSON.stringify(payload, null, 2)}
           cacheObj[field] = translatedItem[field];
         });
         
-        localStorage.setItem(`${CACHE_KEY}${cacheKeyPrefix}_${langKey}_${originalItem.id}`, JSON.stringify(cacheObj));
+        // Save translation and original to detect changes later
+        const cachePayload = {
+          translation: cacheObj,
+          original: {} as any
+        };
+        fieldsToTranslate.forEach(field => {
+          cachePayload.original[field] = originalItem[field];
+        });
+
+        localStorage.setItem(`${CACHE_KEY}${cacheKeyPrefix}_${langKey}_${originalItem.id}`, JSON.stringify(cachePayload));
         translatedItems.push(translatedItem as T);
       }
     }
