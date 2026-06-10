@@ -15,6 +15,7 @@ import { BlogPost } from "../types";
 import { Helmet } from "react-helmet-async";
 import { translateContent } from "../lib/translator";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 export default function Home() {
   const { t, i18n } = useTranslation();
@@ -211,6 +212,7 @@ export default function Home() {
                   </h2>
                   <div className="text-gray-500 text-lg mb-10 max-w-md font-light leading-relaxed font-sans whitespace-pre-line">
                     <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
                       components={{
                         a: ({node, ...props}) => <a {...props} className="text-orange-brand font-bold hover:underline transition-all" target="_blank" rel="noopener noreferrer" />,
                         strong: ({node, ...props}) => <strong {...props} className="font-bold text-indigo-brand" />
@@ -515,8 +517,9 @@ function CultureCard({ title, excerpt, content, image }: { title: string, excerp
             </div>
             <div className="max-w-3xl mx-auto px-6 py-16 -mt-20 relative z-10 bg-white rounded-t-[3rem] shadow-2xl">
               <h2 className="text-5xl md:text-7xl font-extenda font-black text-indigo-brand uppercase mb-8 leading-none tracking-tighter">{title}</h2>
-              <div className="max-w-none text-gray-600 font-serif leading-relaxed whitespace-pre-wrap">
+              <div className="max-w-none text-gray-600 font-serif leading-relaxed whitespace-pre-wrap break-words">
                 <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
                   components={{
                     a: ({node, ...props}) => <a {...props} className="text-indigo-brand font-bold underline hover:text-orange-brand transition-colors" target="_blank" rel="noopener noreferrer" />,
                     strong: ({node, ...props}) => <strong {...props} className="font-black text-indigo-dark" />,
