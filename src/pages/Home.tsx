@@ -26,6 +26,11 @@ export default function Home() {
   const [promo, setPromo] = useState<any>(null);
   const [translatedPromo, setTranslatedPromo] = useState<any>(null);
   const [storeOpen, setStoreOpen] = useState(true);
+  const [storeSchedule, setStoreSchedule] = useState({
+    weekdays: { open: "08:30", close: "15:00" },
+    saturday: { open: "08:30", close: "21:00" },
+    sunday: { open: "08:30", close: "15:00" }
+  });
   
   const { data: blogPosts } = useFirestoreCollection<BlogPost>("blogPosts");
   const [translatedBlogPosts, setTranslatedBlogPosts] = useState<BlogPost[]>([]);
@@ -42,7 +47,11 @@ export default function Home() {
     
     const unsubscribeStore = onSnapshot(doc(db, "settings", "store"), (docSnap) => {
       if (docSnap.exists()) {
-        setStoreOpen(docSnap.data().isOpen ?? true);
+        const data = docSnap.data();
+        setStoreOpen(data.isOpen ?? true);
+        if (data.schedule) {
+          setStoreSchedule(data.schedule);
+        }
       }
     });
 
@@ -95,12 +104,28 @@ export default function Home() {
 
   const total = cart.reduce((sum, item) => sum + item.finalPrice, 0);
 
+  const getCurrentSchedule = () => {
+    const now = new Date();
+    const day = now.getDay();
+    if (day === 0) return storeSchedule.sunday;
+    if (day === 6) return storeSchedule.saturday;
+    return storeSchedule.weekdays;
+  };
+
   const isOrderingTime = () => {
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
     const currentTime = hours + minutes / 60;
-    return currentTime >= 8.5 && currentTime <= 15;
+    
+    const sched = getCurrentSchedule();
+    const [openH, openM] = sched.open.split(':').map(Number);
+    const [closeH, closeM] = sched.close.split(':').map(Number);
+    
+    const openTime = openH + openM / 60;
+    const closeTime = closeH + closeM / 60;
+    
+    return currentTime >= openTime && currentTime <= closeTime;
   };
 
   const sendOrder = (type: "whatsapp" | "reservation") => {
@@ -135,7 +160,8 @@ export default function Home() {
       message += `\n*TOTAL: Bs ${total.toFixed(2)}*\n\n`;
       
       if (!isOrderingTime()) {
-        message += "_*Nota: Sé que estoy fuera del horario de pedidos (8:30 - 15:00), quisiera consultar si es posible coordinar un delivery._\n\n";
+        const s = getCurrentSchedule();
+        message += `_*Nota: Sé que estoy fuera del horario de pedidos (${s.open} - ${s.close}), quisiera consultar si es posible coordinar un delivery._\n\n`;
       }
       
       message += `_esito nomás, muchas gracias_`;
@@ -254,7 +280,7 @@ export default function Home() {
            ) : !isOrderingTime() ? (
              <div className="bg-yellow-brand/10 border-b border-yellow-brand/20 p-4 text-center">
                 <p className="text-indigo-dark font-bold text-xs uppercase tracking-widest">
-                  {t("home.outOfHours", "⚠️ Fuera de horario de pedidos (8:30 - 15:00). Consulta disponibilidad de delivery por WhatsApp.")}
+                  {t("home.outOfHours", `⚠️ Fuera de horario de pedidos (${getCurrentSchedule().open} - ${getCurrentSchedule().close}). Consulta disponibilidad de delivery por WhatsApp.`)}
                 </p>
              </div>
            ) : null}
@@ -325,7 +351,7 @@ export default function Home() {
                   </div>
                 ) : !isOrderingTime() ? (
                   <div className="bg-orange-brand/5 border border-orange-brand/10 p-4 rounded-xl text-orange-brand text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                     {t("home.outOfHoursCart", "Nota: Estás pidiendo fuera del horario estándar (8:30 - 15:00). Coordinaremos tu delivery o recojo vía WhatsApp.")}
+                     {t("home.outOfHoursCart", `Nota: Estás pidiendo fuera del horario estándar (${getCurrentSchedule().open} - ${getCurrentSchedule().close}). Coordinaremos tu delivery o recojo vía WhatsApp.`)}
                   </div>
                 ) : null}
                 

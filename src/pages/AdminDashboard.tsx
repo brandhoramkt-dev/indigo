@@ -149,11 +149,20 @@ function Overview() {
   const { data: admins } = useFirestoreCollection("admins");
   const { data: reservations } = useFirestoreCollection("reservations");
   const [storeOpen, setStoreOpen] = useState(true);
+  const [schedule, setSchedule] = useState({
+    weekdays: { open: "08:30", close: "15:00" },
+    saturday: { open: "08:30", close: "21:00" },
+    sunday: { open: "08:30", close: "15:00" }
+  });
 
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, "settings", "store"), (docSnap) => {
       if (docSnap.exists()) {
-         setStoreOpen(docSnap.data().isOpen ?? true);
+         const data = docSnap.data();
+         setStoreOpen(data.isOpen ?? true);
+         if (data.schedule) {
+           setSchedule(data.schedule);
+         }
       }
     });
     return () => unsubscribe();
@@ -165,6 +174,20 @@ function Overview() {
     } catch (e: any) {
       console.error("Error al actualizar el estado de la tienda", e);
       alert("Hubo un error al actualizar el estado. ¿Tienes permisos de administrador? " + e.message);
+    }
+  };
+
+  const updateSchedule = async (day: 'weekdays'|'saturday'|'sunday', field: 'open'|'close', value: string) => {
+    const newSchedule = {
+      ...schedule,
+      [day]: { ...schedule[day], [field]: value }
+    };
+    setSchedule(newSchedule);
+    try {
+      await setDoc(doc(db, "settings", "store"), { schedule: newSchedule }, { merge: true });
+    } catch (e: any) {
+      console.error(e);
+      alert("Error al actualizar el horario.");
     }
   };
 
@@ -202,8 +225,43 @@ function Overview() {
         <StatCard title="Usuarios" value={admins?.length.toString() || "0"} icon={Users} />
       </div>
 
-      <div className="grid grid-cols-1 gap-12">
+      {/* Schedule Settings */}
+      <div className="bg-white rounded-[2rem] p-8 border border-gray-100 shadow-sm">
+        <h3 className="font-display font-black text-xl uppercase mb-6 flex items-center gap-2">
+          <Clock size={20} className="text-orange-brand" /> Horarios de Atención
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {['weekdays', 'saturday', 'sunday'].map((day) => (
+            <div key={day} className="space-y-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                {day === 'weekdays' ? 'Lunes a Viernes' : day === 'saturday' ? 'Sábados' : 'Domingos'}
+              </h4>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Apertura</label>
+                  <input 
+                    type="time" 
+                    value={(schedule as any)[day].open}
+                    onChange={(e) => updateSchedule(day as any, 'open', e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-brand/30"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="block text-[9px] font-bold text-gray-400 uppercase mb-1">Cierre</label>
+                  <input 
+                    type="time" 
+                    value={(schedule as any)[day].close}
+                    onChange={(e) => updateSchedule(day as any, 'close', e.target.value)}
+                    className="w-full bg-gray-50 border border-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-indigo-brand/30"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
+      <div className="grid grid-cols-1 gap-12">
          <div className="bg-indigo-brand rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
             <div className="relative z-10">
                <h3 className="font-display font-black text-2xl uppercase mb-4">Mejora tu presencia</h3>
