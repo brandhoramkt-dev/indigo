@@ -17,6 +17,9 @@ export interface Product {
 export interface BlogPost {
   id: string;
   title: string;
+  slug?: string;
+  seoTitle?: string;
+  seoDescription?: string;
   summary: string;
   content: string;
   imageUrl: string;

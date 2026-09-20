@@ -6,12 +6,12 @@ import Hero from "../components/Hero";
 import MenuSection from "../components/MenuSection";
 import Footer from "../components/Footer";
 import CoffeeMatchmaker from "../components/CoffeeMatchmaker";
-import { CartItem } from "../types";
-import { X, Trash2, ShoppingBag } from "lucide-react";
+import { Link } from "react-router-dom";
+import { CartItem, BlogPost } from "../types";
+import { X, Trash2, ShoppingBag, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { useFirestoreCollection } from "../lib/hooks";
-import { BlogPost } from "../types";
 import { Helmet } from "react-helmet-async";
 import { translateContent } from "../lib/translator";
 import ReactMarkdown from "react-markdown";
@@ -296,15 +296,15 @@ export default function Home() {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-               {translatedBlogPosts.length > 0 ? translatedBlogPosts.map((post) => (
-                 <CultureCard 
-                   key={post.id}
-                   title={post.title}
-                   excerpt={post.summary}
-                   content={post.content}
-                   image={post.imageUrl}
-                 />
-               )) : (
+                {translatedBlogPosts.length > 0 ? translatedBlogPosts.map((post) => (
+                  <CultureCard 
+                    key={post.id}
+                    title={post.title}
+                    excerpt={post.summary}
+                    image={post.imageUrl}
+                    slug={post.slug || post.id}
+                  />
+                )) : (
                  <div className="col-span-full py-12 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
                     <p className="text-gray-400 font-sans uppercase tracking-widest text-xs font-bold">Próximamente nuevas historias</p>
                  </div>
@@ -505,16 +505,14 @@ export default function Home() {
   );
 }
 
-function CultureCard({ title, excerpt, content, image }: { title: string, excerpt: string, content: string, image: string }) {
+function CultureCard({ title, excerpt, image, slug }: { title: string, excerpt: string, image: string, slug: string }) {
   const { t } = useTranslation();
-  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <>
+    <Link to={`/cultura/${slug}`} className="block h-full">
       <motion.div 
         whileHover={{ y: -5 }}
         className="group cursor-pointer flex flex-col h-full"
-        onClick={() => setIsOpen(true)}
       >
          <div className="relative h-80 rounded-3xl overflow-hidden mb-6">
             <img src={image} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" referrerPolicy="no-referrer" />
@@ -522,44 +520,9 @@ function CultureCard({ title, excerpt, content, image }: { title: string, excerp
          </div>
          <h3 className="font-extenda font-black text-3xl text-indigo-brand uppercase group-hover:text-orange-brand transition-colors mb-4">{title}</h3>
          <p className="text-gray-500 font-light leading-relaxed mb-6 font-sans flex-grow">{excerpt}</p>
-         <span className="text-orange-brand font-bold text-sm tracking-widest flex items-center gap-2 font-sans mt-auto">{t("home.readMore", "LEER MÁS")} <X size={16} className="rotate-45" /></span>
+         <span className="text-orange-brand font-bold text-sm tracking-widest flex items-center gap-2 font-sans mt-auto">{t("home.readMore", "LEER MÁS")} <ArrowRight size={16} /></span>
       </motion.div>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-white overflow-y-auto"
-          >
-            <div className="relative h-96 md:h-[60vh] w-full">
-              <img src={image} alt={title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-              <div className="absolute inset-0 bg-gradient-to-t from-white via-black/20 to-black/60"></div>
-              <button 
-                onClick={() => setIsOpen(false)}
-                className="absolute top-6 right-6 p-4 bg-white/20 hover:bg-white text-white hover:text-indigo-brand rounded-full backdrop-blur-md transition-all z-10 shadow-2xl"
-              >
-                <X size={24} />
-              </button>
-            </div>
-            <div className="max-w-3xl mx-auto px-6 py-16 -mt-20 relative z-10 bg-white rounded-t-[3rem] shadow-2xl">
-              <h2 className="text-5xl md:text-7xl font-extenda font-black text-indigo-brand uppercase mb-8 leading-none tracking-tighter">{title}</h2>
-              <div className="max-w-none text-gray-600 font-serif leading-relaxed whitespace-pre-wrap break-words">
-                <ReactMarkdown
-                  remarkPlugins={[remarkGfm]}
-                  components={{
-                    a: ({node, ...props}) => <a {...props} className="text-indigo-brand font-bold underline hover:text-orange-brand transition-colors" target="_blank" rel="noopener noreferrer" />,
-                    strong: ({node, ...props}) => <strong {...props} className="font-black text-indigo-dark" />,
-                    em: ({node, ...props}) => <em {...props} className="italic text-gray-500" />
-                  }}
-                >
-                  {content}
-                </ReactMarkdown>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    </Link>
   );
 }
 

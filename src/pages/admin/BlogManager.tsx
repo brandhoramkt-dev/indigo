@@ -5,6 +5,16 @@ import { useFirestoreCollection } from "../../lib/hooks";
 import { BlogPost } from "../../types";
 import { Plus, Trash2, Pencil } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import MDEditor from '@uiw/react-md-editor';
+
+const generateSlug = (text: string) => {
+  return text.toString().toLowerCase()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-')
+    .replace(/^-+/, '')
+    .replace(/-+$/, '');
+};
 
 export default function BlogManager() {
   const { data: posts, loading } = useFirestoreCollection<BlogPost>("blogPosts");
@@ -12,12 +22,18 @@ export default function BlogManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   
   const [title, setTitle] = useState("");
+  const [slug, setSlug] = useState("");
+  const [seoTitle, setSeoTitle] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
   const [summary, setSummary] = useState("");
   const [content, setContent] = useState("");
   const [imageUrl, setImageUrl] = useState("");
 
   const resetForm = () => {
     setTitle("");
+    setSlug("");
+    setSeoTitle("");
+    setSeoDescription("");
     setSummary("");
     setContent("");
     setImageUrl("");
@@ -28,6 +44,9 @@ export default function BlogManager() {
   const handleEdit = (post: BlogPost) => {
     setEditingId(post.id);
     setTitle(post.title);
+    setSlug(post.slug || "");
+    setSeoTitle(post.seoTitle || "");
+    setSeoDescription(post.seoDescription || "");
     setSummary(post.summary);
     setContent(post.content);
     setImageUrl(post.imageUrl || "");
@@ -37,8 +56,13 @@ export default function BlogManager() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const finalSlug = slug || generateSlug(title);
+      
       const postData = {
         title,
+        slug: finalSlug,
+        seoTitle,
+        seoDescription,
         summary,
         content,
         imageUrl: imageUrl || "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=2070&auto=format&fit=crop"
@@ -110,13 +134,34 @@ export default function BlogManager() {
         {isFormOpen && (
           <>
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={resetForm} className="fixed inset-0 bg-indigo-dark/80 backdrop-blur-sm z-[100]" />
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-2xl bg-white rounded-[2.5rem] p-12 shadow-2xl z-[110]">
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl bg-white rounded-[2.5rem] p-8 md:p-12 shadow-2xl z-[110] max-h-[90vh] overflow-y-auto">
               <h2 className="text-4xl font-display font-black text-indigo-brand uppercase mb-8">{editingId ? 'EDITAR' : 'NUEVA'} <span className="text-orange-brand">HISTORIA</span></h2>
               <form onSubmit={handleSave} className="space-y-6">
-                <div>
-                  <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Título</label>
-                  <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Título</label>
+                    <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Enlace Amigable (Slug) - Opcional</label>
+                    <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="mi-historia-increible" className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" />
+                  </div>
                 </div>
+                
+                <div className="bg-indigo-50/50 p-6 rounded-2xl border border-indigo-100/50 space-y-4">
+                  <h4 className="text-xs font-black uppercase tracking-widest text-indigo-brand">Configuración SEO</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Título SEO (Opcional)</label>
+                      <input type="text" value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} placeholder="Título para Google" className="w-full bg-white border border-gray-100 rounded-2xl py-3 px-4 focus:outline-none focus:border-indigo-brand/30 text-sm" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Descripción SEO (Opcional)</label>
+                      <input type="text" value={seoDescription} onChange={(e) => setSeoDescription(e.target.value)} placeholder="Resumen para Google" className="w-full bg-white border border-gray-100 rounded-2xl py-3 px-4 focus:outline-none focus:border-indigo-brand/30 text-sm" />
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">URL de Imagen</label>
                   <input type="text" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://..." className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" />
@@ -125,10 +170,14 @@ export default function BlogManager() {
                   <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Resumen Corto</label>
                   <input type="text" value={summary} onChange={(e) => setSummary(e.target.value)} required className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" />
                 </div>
-                <div>
+                <div data-color-mode="light">
                   <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">Contenido</label>
-                  <textarea value={content} onChange={(e) => setContent(e.target.value)} rows={6} required className="w-full bg-gray-50 border border-gray-100 rounded-2xl py-4 px-6 focus:outline-none focus:border-indigo-brand/30" />
-                  <p className="text-[10px] text-gray-400 mt-2">Puedes usar formato usando código: **negrita**, *cursiva*, [texto del link](https://ejemplo.com)</p>
+                  <MDEditor
+                    value={content}
+                    onChange={(val) => setContent(val || '')}
+                    height={300}
+                    className="overflow-hidden rounded-2xl border border-gray-100 shadow-none"
+                  />
                 </div>
                 <div className="flex gap-4 pt-4">
                   <button type="button" onClick={resetForm} className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-400 font-bold py-4 rounded-2xl uppercase tracking-widest text-xs">Cancelar</button>

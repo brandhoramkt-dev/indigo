@@ -6,6 +6,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Login";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import BlogPostView from "./pages/BlogPostView";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, isAdmin, loading } = useAuth();
@@ -25,6 +26,7 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/cultura/:slug" element={<BlogPostView />} />
           <Route path="/login" element={<Login />} />
           <Route 
             path="/admin/*" 
