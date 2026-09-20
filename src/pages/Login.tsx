@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 import { Coffee, ArrowRight } from "lucide-react";
 
 export default function Login() {
-  const { login, user, isAdmin, loading } = useAuth();
+  const { login, logout, user, isAdmin, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,6 +15,10 @@ export default function Login() {
   }, [user, isAdmin, navigate]);
 
   if (loading) return null;
+
+  const handleTryAnotherAccount = async () => {
+    await logout();
+  };
 
   return (
     <div className="min-h-screen bg-indigo-dark flex items-center justify-center px-6">
@@ -40,7 +44,7 @@ export default function Login() {
           <div className="bg-red-50 text-red-600 p-6 rounded-2xl text-sm mb-8 border border-red-100 flex flex-col gap-4">
             <p className="font-bold">Acceso Denegado</p>
             <p>Tu cuenta ({user.email}) no está registrada como socio. Por favor contacta al administrador del sistema.</p>
-            <button onClick={() => window.location.reload()} className="text-red-700 font-black underline text-xs uppercase tracking-widest text-left">Intentar con otra cuenta</button>
+            <button onClick={handleTryAnotherAccount} className="text-red-700 font-black underline text-xs uppercase tracking-widest text-left">Intentar con otra cuenta</button>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
