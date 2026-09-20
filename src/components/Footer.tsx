@@ -1,9 +1,27 @@
 import { Coffee, Instagram, Facebook, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useState, useEffect } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 export default function Footer() {
   const { t } = useTranslation();
+  const [schedule, setSchedule] = useState({
+    weekdays: { open: "08:30", close: "15:00" },
+    saturday: { open: "08:30", close: "21:00" },
+    sunday: { open: "08:30", close: "15:00" }
+  });
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(doc(db, "settings", "store"), (docSnap) => {
+      if (docSnap.exists() && docSnap.data().schedule) {
+        setSchedule(docSnap.data().schedule);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <footer className="bg-indigo-dark text-white pt-24 pb-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -31,13 +49,21 @@ export default function Footer() {
             </div>
           </div>
           
-
-          
           <div>
              <h4 className="font-extenda font-bold uppercase tracking-widest text-xs text-yellow-brand mb-8">{t("footer.hours", "Horarios")}</h4>
              <ul className="space-y-4 text-white/60 text-sm font-sans">
-                <li className="flex justify-between"><span>{t("footer.monFri", "Lun - Vie")}</span> <span>08:00 - 21:00</span></li>
-                <li className="flex justify-between"><span>{t("footer.satSun", "Sáb - Dom")}</span> <span>09:00 - 17:00</span></li>
+                <li className="flex justify-between items-center border-b border-white/5 pb-3">
+                   <span className="font-bold">{t("footer.monFri", "Lunes a Viernes")}</span> 
+                   <span className="bg-white/10 text-white px-3 py-1 rounded-full text-xs">{schedule.weekdays.open} - {schedule.weekdays.close}</span>
+                </li>
+                <li className="flex justify-between items-center border-b border-white/5 pb-3">
+                   <span className="font-bold">{t("footer.saturday", "Sábados")}</span> 
+                   <span className="bg-white/10 text-white px-3 py-1 rounded-full text-xs">{schedule.saturday.open} - {schedule.saturday.close}</span>
+                </li>
+                <li className="flex justify-between items-center">
+                   <span className="font-bold">{t("footer.sunday", "Domingos")}</span> 
+                   <span className="bg-white/10 text-white px-3 py-1 rounded-full text-xs">{schedule.sunday.open} - {schedule.sunday.close}</span>
+                </li>
              </ul>
           </div>
 
