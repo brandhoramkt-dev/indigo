@@ -26,6 +26,7 @@ export default function Home() {
   const [promo, setPromo] = useState<any>(null);
   const [translatedPromo, setTranslatedPromo] = useState<any>(null);
   const [storeOpen, setStoreOpen] = useState(true);
+  const [ordersEnabled, setOrdersEnabled] = useState(true);
   const [storeSchedule, setStoreSchedule] = useState({
     weekdays: { open: "08:30", close: "15:00" },
     saturday: { open: "08:30", close: "21:00" },
@@ -49,6 +50,7 @@ export default function Home() {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setStoreOpen(data.isOpen ?? true);
+        setOrdersEnabled(data.ordersEnabled ?? true);
         if (data.schedule) {
           setStoreSchedule(data.schedule);
         }
@@ -274,7 +276,13 @@ export default function Home() {
            {!storeOpen ? (
              <div className="bg-red-500/10 border-b border-red-500/20 p-4 text-center">
                 <p className="text-red-700 font-bold text-xs uppercase tracking-widest">
-                  {t("home.closedMsg", "⚠️ La tienda se encuentra cerrada por el momento. No estamos recibiendo pedidos.")}
+                  {t("home.closedMsg", "⚠️ La tienda se encuentra cerrada por el momento.")}
+                </p>
+             </div>
+           ) : !ordersEnabled ? (
+             <div className="bg-orange-500/10 border-b border-orange-500/20 p-4 text-center">
+                <p className="text-orange-700 font-bold text-xs uppercase tracking-widest">
+                  {t("home.ordersDisabledMsg", "⚠️ Los pedidos online se encuentran pausados por el momento.")}
                 </p>
              </div>
            ) : !isOrderingTime() ? (
@@ -284,7 +292,7 @@ export default function Home() {
                 </p>
              </div>
            ) : null}
-           <MenuSection onAddToCart={addToCart} disabled={!storeOpen} />
+           <MenuSection onAddToCart={addToCart} disabled={!ordersEnabled} />
          </section>
 
         {/* Culture Section */}
@@ -347,7 +355,11 @@ export default function Home() {
               <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-4">
                 {!storeOpen ? (
                   <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-xl text-red-600 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
-                     {t("home.closedMsgCart", "⚠️ La tienda se encuentra cerrada hoy. Por el momento no estamos recibiendo pedidos, inténtalo más tarde.")}
+                     {t("home.closedMsgCart", "⚠️ La tienda se encuentra cerrada hoy.")}
+                  </div>
+                ) : !ordersEnabled ? (
+                  <div className="bg-orange-500/10 border border-orange-500/20 p-4 rounded-xl text-orange-600 text-[10px] font-bold uppercase tracking-widest leading-relaxed">
+                     {t("home.ordersDisabledMsgCart", "⚠️ Por el momento no estamos recibiendo pedidos online.")}
                   </div>
                 ) : !isOrderingTime() ? (
                   <div className="bg-orange-brand/5 border border-orange-brand/10 p-4 rounded-xl text-orange-brand text-[10px] font-bold uppercase tracking-widest leading-relaxed">
@@ -424,7 +436,7 @@ export default function Home() {
                 {cartStep === "list" ? (
                   <button 
                     onClick={() => setCartStep("qr")}
-                    disabled={cart.length === 0 || !storeOpen}
+                    disabled={cart.length === 0 || !ordersEnabled}
                     className="w-full bg-indigo-brand hover:bg-orange-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-indigo-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
                     {t("cart.confirm", "CONFIRMAR PEDIDO")}
@@ -432,7 +444,7 @@ export default function Home() {
                 ) : (
                   <button 
                     onClick={() => sendOrder("whatsapp")}
-                    disabled={cart.length === 0 || !storeOpen}
+                    disabled={cart.length === 0 || !ordersEnabled}
                     className="w-full bg-orange-brand hover:bg-indigo-brand text-white py-4 md:py-5 rounded-2xl font-bold tracking-[0.2em] transition-all shadow-xl shadow-orange-brand/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed text-xs"
                   >
                     {isOrderingTime() ? t("cart.checkout", "FINALIZAR PEDIDO (WHATSAPP)") : t("cart.checkAvailability", "CONSULTAR DISPONIBILIDAD")}

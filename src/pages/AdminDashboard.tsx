@@ -149,6 +149,7 @@ function Overview() {
   const { data: admins } = useFirestoreCollection("admins");
   const { data: reservations } = useFirestoreCollection("reservations");
   const [storeOpen, setStoreOpen] = useState(true);
+  const [ordersEnabled, setOrdersEnabled] = useState(true);
   const [schedule, setSchedule] = useState({
     weekdays: { open: "08:30", close: "15:00" },
     saturday: { open: "08:30", close: "21:00" },
@@ -160,6 +161,7 @@ function Overview() {
       if (docSnap.exists()) {
          const data = docSnap.data();
          setStoreOpen(data.isOpen ?? true);
+         setOrdersEnabled(data.ordersEnabled ?? true);
          if (data.schedule) {
            setSchedule(data.schedule);
          }
@@ -174,6 +176,15 @@ function Overview() {
     } catch (e: any) {
       console.error("Error al actualizar el estado de la tienda", e);
       alert("Hubo un error al actualizar el estado. ¿Tienes permisos de administrador? " + e.message);
+    }
+  };
+
+  const toggleOrdersStatus = async () => {
+    try {
+      await setDoc(doc(db, "settings", "store"), { ordersEnabled: !ordersEnabled }, { merge: true });
+    } catch (e: any) {
+      console.error("Error al actualizar el estado de pedidos", e);
+      alert("Hubo un error al actualizar el estado de pedidos. " + e.message);
     }
   };
 
@@ -201,20 +212,36 @@ function Overview() {
            <h1 className="text-4xl md:text-5xl font-display font-black text-indigo-brand tracking-tighter uppercase">RESUMEN <span className="text-orange-brand">OPERATIVO</span></h1>
            <p className="text-gray-400 mt-2 font-medium text-sm md:text-base">Bienvenido de nuevo al centro de mando de Indigo Coffee.</p>
         </div>
-        <div className="flex flex-col items-start md:items-end bg-white md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none border md:border-none border-gray-100 shadow-sm md:shadow-none w-full md:w-auto">
-           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 mb-2">Estado de la Tienda</p>
-           <button 
-             onClick={toggleStoreStatus}
-             className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest border flex items-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-sm ${
-               storeOpen 
-                 ? "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20" 
-                 : "bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20"
-             }`}
-           >
-              <span className={`w-2.5 h-2.5 rounded-full ${storeOpen ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"}`}></span> 
-              {storeOpen ? "Abierto" : "Cerrado (Pedidos Desactivados)"}
-           </button>
-           <p className="text-[9px] text-gray-400 mt-2 max-w-[200px] md:text-right">Click para {storeOpen ? "desactivar" : "activar"} los pedidos en la página principal.</p>
+        <div className="flex flex-col sm:flex-row gap-4 items-start md:items-end bg-white md:bg-transparent p-4 md:p-0 rounded-2xl md:rounded-none border md:border-none border-gray-100 shadow-sm md:shadow-none w-full md:w-auto">
+           <div className="flex flex-col gap-2 w-full sm:w-auto">
+             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Local Físico</p>
+             <button 
+               onClick={toggleStoreStatus}
+               className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest border flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-sm ${
+                 storeOpen 
+                   ? "bg-green-500/10 text-green-600 border-green-500/30 hover:bg-green-500/20" 
+                   : "bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20"
+               }`}
+             >
+                <span className={`w-2.5 h-2.5 rounded-full ${storeOpen ? "bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]" : "bg-red-500"}`}></span> 
+                {storeOpen ? "Abierto" : "Cerrado"}
+             </button>
+           </div>
+           
+           <div className="flex flex-col gap-2 w-full sm:w-auto">
+             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1">Pedidos Online</p>
+             <button 
+               onClick={toggleOrdersStatus}
+               className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest border flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 shadow-sm ${
+                 ordersEnabled 
+                   ? "bg-indigo-500/10 text-indigo-600 border-indigo-500/30 hover:bg-indigo-500/20" 
+                   : "bg-red-500/10 text-red-600 border-red-500/30 hover:bg-red-500/20"
+               }`}
+             >
+                <span className={`w-2.5 h-2.5 rounded-full ${ordersEnabled ? "bg-indigo-500 animate-pulse shadow-[0_0_8px_rgba(99,102,241,0.6)]" : "bg-red-500"}`}></span> 
+                {ordersEnabled ? "Activos" : "Pausados"}
+             </button>
+           </div>
         </div>
       </header>
 
