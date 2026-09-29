@@ -76,9 +76,10 @@ export default function CoffeeMatchmaker({ onAddToCart }: CoffeeMatchmakerProps)
 
       const textResponse = response.text || t("matchmaker.error", "Lo siento, tuve un problema preparando tu recomendación. ¿Podrías repetirlo?");
       setMessages((prev) => [...prev, { role: "model", content: textResponse }]);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error with Gemini API:", error);
-      setMessages((prev) => [...prev, { role: "model", content: t("matchmaker.networkError", "Lo siento, tuve un problema de conexión. ¿Podemos intentarlo de nuevo?") }]);
+      const errorMessage = error?.message || "Desconocido";
+      setMessages((prev) => [...prev, { role: "model", content: t("matchmaker.networkError", "Lo siento, tuve un problema de conexión. ¿Podemos intentarlo de nuevo?") + `\n\n[Detalle técnico: ${errorMessage}]` }]);
     } finally {
       setIsLoading(false);
     }
