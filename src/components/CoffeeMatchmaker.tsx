@@ -41,26 +41,37 @@ export default function CoffeeMatchmaker({ onAddToCart }: CoffeeMatchmakerProps)
     setIsLoading(true);
 
     try {
-      // Build the chat history for context
-      const chatHistory = messages.map((m) => ({
-        role: m.role,
-        parts: [{ text: m.content }]
-      }));
-
       const systemPrompt = getSystemPrompt(i18n.language, products);
 
-      // Create a new chat session to maintain context if supported, 
-      // but since we are using generateContent, we pass the entire history.
-      const contents = [
-        { role: "user", parts: [{ text: systemPrompt }] },
-        { role: "model", parts: [{ text: "Entendido, actuaré como el barista." }] },
-        ...chatHistory,
-        { role: "user", parts: [{ text: userMessage }] }
-      ];
+      const validContents: any[] = [];
+      
+      // Ensure the history starts with a user message.
+      if (messages.length > 0 && messages[0].role === "model") {
+        validContents.push({ role: "user", parts: [{ text: "Hola" }] });
+      }
+
+      // Add all previous messages, combining consecutive same-role messages
+      for (const m of messages) {
+        if (validContents.length > 0 && validContents[validContents.length - 1].role === m.role) {
+          validContents[validContents.length - 1].parts[0].text += "\n" + m.content;
+        } else {
+          validContents.push({ role: m.role, parts: [{ text: m.content }] });
+        }
+      }
+
+      // Add the current user message
+      if (validContents.length > 0 && validContents[validContents.length - 1].role === "user") {
+        validContents[validContents.length - 1].parts[0].text += "\n" + userMessage;
+      } else {
+        validContents.push({ role: "user", parts: [{ text: userMessage }] });
+      }
 
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
-        contents: contents,
+        contents: validContents,
+        config: {
+          systemInstruction: systemPrompt,
+        }
       });
 
       const textResponse = response.text || t("matchmaker.error", "Lo siento, tuve un problema preparando tu recomendación. ¿Podrías repetirlo?");
