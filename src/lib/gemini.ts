@@ -4,7 +4,14 @@ import { GoogleGenAI } from "@google/genai";
 // Vite's define in vite.config.ts maps process.env.GEMINI_API_KEY to the actual value.
 const apiKey = process.env.GEMINI_API_KEY;
 
-export const ai = new GoogleGenAI(apiKey ? { apiKey } : {});
+export const ai = new GoogleGenAI(apiKey ? { 
+  apiKey,
+  httpOptions: {
+    headers: {
+      "x-goog-api-key": apiKey
+    }
+  }
+} : {});
 
 export const getSystemPrompt = (language: string, products: any[]) => `
 Eres el "Matchmaker de Café", un barista experto virtual de "Indigo Coffee Hub" ubicado en La Paz, Bolivia.
