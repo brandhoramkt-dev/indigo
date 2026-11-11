@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useFirestoreCollection } from "../lib/hooks";
 import { Helmet } from "react-helmet-async";
 import { translateContent } from "../lib/translator";
+import { calculateCartItemUnitPrice, calculateCartItemTotal, calculateCartTotal } from "../lib/pricing";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -82,7 +83,18 @@ export default function Home() {
     const savedCart = localStorage.getItem("indigo-cart");
     if (savedCart) {
       try {
-        setCart(JSON.parse(savedCart));
+        const parsed = JSON.parse(savedCart);
+        if (Array.isArray(parsed)) {
+          const sanitized = parsed.map((item: CartItem) => {
+            const calculatedUnitPrice = calculateCartItemUnitPrice(item);
+            return {
+              ...item,
+              quantity: item.quantity && item.quantity > 0 ? item.quantity : 1,
+              finalPrice: calculatedUnitPrice > 0 ? calculatedUnitPrice : (item.finalPrice || item.price)
+            };
+          });
+          setCart(sanitized);
+        }
       } catch (e) {
         console.error("Error parsing cart:", e);
       }
@@ -95,7 +107,60 @@ export default function Home() {
   }, [cart]);
 
   const addToCart = (item: CartItem) => {
-    setCart(prev => [...prev, item]);
+    setCart(prev => {
+      const existingIndex = prev.findIndex(
+        p => p.id === item.id && 
+             p.selectedTemp === item.selectedTemp && 
+             p.selectedMilk === item.selectedMilk && 
+             p.selectedEssence === item.selectedEssence &&
+             p.selectedFlavor === item.selectedFlavor
+      );
+      if (existingIndex > -1) {
+        const updated = [...prev];
+        const currentQty = updated[existingIndex].quantity || 1;
+        const addQty = item.quantity || 1;
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: currentQty + addQty
+        };
+        return updated;
+      }
+      return [...prev, { ...item, quantity: item.quantity || 1 }];
+    });
+  };
+
+  const updateItemQuantity = (uniqueId: string, newQuantity: number) => {
+    if (newQuantity <= 0) {
+      removeFromCart(uniqueId);
+      return;
+    }
+    setCart(prev => prev.map(item => {
+      if (item.uniqueId === uniqueId) {
+        return { ...item, quantity: newQuantity };
+      }
+      return item;
+    }));
+  };
+
+  const removeExtraFromCartItem = (uniqueId: string, extraType: 'milk' | 'essence' | 'flavor') => {
+    setCart(prev => prev.map(item => {
+      if (item.uniqueId === uniqueId) {
+        const updated = { ...item };
+        if (extraType === 'milk') {
+          updated.selectedMilk = undefined;
+        }
+        if (extraType === 'essence') {
+          updated.selectedEssence = undefined;
+        }
+        if (extraType === 'flavor') {
+          updated.selectedFlavor = undefined;
+        }
+        updated.extras = [];
+        updated.finalPrice = calculateCartItemUnitPrice(updated);
+        return updated;
+      }
+      return item;
+    }));
   };
 
   const removeFromCart = (uniqueId: string) => {
@@ -104,7 +169,8 @@ export default function Home() {
 
   const clearCart = () => setCart([]);
 
-  const total = cart.reduce((sum, item) => sum + item.finalPrice, 0);
+  const total = calculateCartTotal(cart);
+  const cartTotalCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
 
   const getCurrentSchedule = () => {
     const now = new Date();
@@ -149,10 +215,14 @@ export default function Home() {
            key += ` (${details.join(', ')})`;
         }
 
+        const qty = item.quantity && item.quantity > 0 ? item.quantity : 1;
+        const unitPrice = item.finalPrice > 0 ? item.finalPrice : calculateCartItemUnitPrice(item);
+
         if (!acc[key]) {
-          acc[key] = { count: 0, price: item.finalPrice };
+          acc[key] = { count: 0, price: unitPrice };
         }
-        acc[key].count += 1;
+        acc[key].count += qty;
+        acc[key].price = unitPrice;
         return acc;
       }, {});
 
@@ -183,7 +253,7 @@ export default function Home() {
         <meta property="og:image" content="https://indigocoffee.web.app/logo.png" />
       </Helmet>
 
-      <Navbar cartCount={cart.length} onOpenCart={() => setIsCartOpen(true)} />
+      <Navbar cartCount={cartTotalCount} onOpenCart={() => setIsCartOpen(true)} />
       
       <main>
         <Hero onOpenImageMenu={() => setIsImageMenuOpen(true)} />
@@ -374,33 +444,104 @@ export default function Home() {
                       <p className="font-sans font-bold uppercase tracking-widest text-sm text-indigo-brand">{t("cart.empty", "Tu carrito está vacío")}</p>
                     </div>
                   ) : (
-                    cart.map((item) => (
-                      <div key={item.uniqueId} className="flex justify-between items-center border-b border-gray-50 pb-4 group">
-                        <div className="flex-1">
-                          <h4 className="font-bold text-sm text-indigo-brand uppercase leading-tight font-sans">{item.name}</h4>
-                          <div className="flex gap-2 mt-1">
-                             {item.selectedTemp && (
-                                <span className="text-[8px] font-bold bg-orange-brand/10 text-orange-brand px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedTemp}</span>
-                             )}
-                             {item.selectedMilk && (
-                                <span className="text-[8px] font-bold bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedMilk}</span>
-                             )}
-                             {item.selectedEssence && (
-                                <span className="text-[8px] font-bold bg-indigo-brand/10 text-indigo-brand px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedEssence}</span>
-                             )}
+                    cart.map((item) => {
+                      const itemQty = item.quantity && item.quantity > 0 ? item.quantity : 1;
+                      const itemUnitPrice = item.finalPrice > 0 ? item.finalPrice : calculateCartItemUnitPrice(item);
+                      const itemSubtotal = itemUnitPrice * itemQty;
+
+                      return (
+                        <div key={item.uniqueId} className="flex justify-between items-center border-b border-gray-50 pb-4 group">
+                          <div className="flex-1 pr-2">
+                            <h4 className="font-bold text-sm text-indigo-brand uppercase leading-tight font-sans">{item.name}</h4>
+                            <div className="flex flex-wrap gap-1.5 mt-1.5">
+                               {item.selectedTemp && (
+                                  <span className="text-[8px] font-bold bg-orange-brand/10 text-orange-brand px-2 py-0.5 rounded-md uppercase tracking-wider">{item.selectedTemp}</span>
+                               )}
+                               {item.selectedMilk && (
+                                  <span className="text-[8px] font-bold bg-blue-500/10 text-blue-600 px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
+                                     <span>{item.selectedMilk}</span>
+                                     <button 
+                                       type="button" 
+                                       onClick={() => removeExtraFromCartItem(item.uniqueId, 'milk')} 
+                                       className="hover:text-red-500 ml-0.5 font-bold text-[10px] leading-none"
+                                       title="Quitar este extra"
+                                     >
+                                       ×
+                                     </button>
+                                  </span>
+                               )}
+                               {item.selectedEssence && (
+                                  <span className="text-[8px] font-bold bg-indigo-brand/10 text-indigo-brand px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
+                                     <span>{item.selectedEssence}</span>
+                                     <button 
+                                       type="button" 
+                                       onClick={() => removeExtraFromCartItem(item.uniqueId, 'essence')} 
+                                       className="hover:text-red-500 ml-0.5 font-bold text-[10px] leading-none"
+                                       title="Quitar este extra"
+                                     >
+                                       ×
+                                     </button>
+                                  </span>
+                               )}
+                               {item.selectedFlavor && (
+                                  <span className="text-[8px] font-bold bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md uppercase tracking-wider flex items-center gap-1">
+                                     <span>{item.selectedFlavor}</span>
+                                     <button 
+                                       type="button" 
+                                       onClick={() => removeExtraFromCartItem(item.uniqueId, 'flavor')} 
+                                       className="hover:text-red-500 ml-0.5 font-bold text-[10px] leading-none"
+                                       title="Quitar este extra"
+                                     >
+                                       ×
+                                     </button>
+                                  </span>
+                               )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-0.5">
+                              <button 
+                                onClick={() => updateItemQuantity(item.uniqueId, itemQty - 1)}
+                                className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 font-bold text-xs rounded transition-colors"
+                                title="Disminuir cantidad"
+                              >
+                                -
+                              </button>
+                              <span className="text-xs font-black text-indigo-brand px-1.5 min-w-[16px] text-center">
+                                {itemQty}
+                              </span>
+                              <button 
+                                onClick={() => updateItemQuantity(item.uniqueId, itemQty + 1)}
+                                className="w-5 h-5 flex items-center justify-center text-gray-400 hover:text-indigo-brand font-bold text-xs rounded transition-colors"
+                                title="Aumentar cantidad"
+                              >
+                                +
+                              </button>
+                            </div>
+
+                            <div className="text-right min-w-[70px]">
+                              <span className="text-indigo-brand font-black text-sm font-sans block whitespace-nowrap">
+                                Bs {itemSubtotal.toFixed(2)}
+                              </span>
+                              {itemQty > 1 && (
+                                <span className="text-[9px] text-gray-400 font-bold block whitespace-nowrap">
+                                  Bs {itemUnitPrice.toFixed(2)} c/u
+                                </span>
+                              )}
+                            </div>
+
+                            <button 
+                              onClick={() => removeFromCart(item.uniqueId)}
+                              className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                              title="Eliminar producto"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         </div>
-                        <div className="flex items-center gap-4">
-                          <span className="text-gray-400 font-black text-sm font-sans whitespace-nowrap">Bs {item.finalPrice}</span>
-                          <button 
-                            onClick={() => removeFromCart(item.uniqueId)}
-                            className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center">
@@ -505,7 +646,7 @@ export default function Home() {
               onClick={() => setIsCartOpen(true)}
               className="pointer-events-auto w-full max-w-sm bg-orange-brand text-white px-8 py-4 rounded-full font-bold tracking-[0.2em] uppercase text-xs shadow-2xl shadow-orange-brand/30 flex items-center justify-between border-2 border-white/20 active:scale-95 transition-transform"
             >
-              <span className="flex items-center gap-2"><ShoppingBag size={18} /> {t("cart.viewOrder", "VER PEDIDO")} ({cart.length})</span>
+              <span className="flex items-center gap-2"><ShoppingBag size={18} /> {t("cart.viewOrder", "VER PEDIDO")} ({cartTotalCount})</span>
               <span>Bs {total.toFixed(2)}</span>
             </button>
           </motion.div>

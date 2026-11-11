@@ -52,4 +52,6 @@ export interface CartItem extends Product {
   selectedFlavor?: string;
   selectedEssence?: string;
   finalPrice: number;
+  quantity?: number;
+  extras?: any[];
 }

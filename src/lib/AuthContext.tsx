@@ -17,7 +17,7 @@ interface AuthContextType {
   user: User | null;
   isAdmin: boolean;
   loading: boolean;
-  login: () => Promise<void>;
+  login: (method?: 'popup' | 'redirect') => Promise<void>;
   logout: () => Promise<void>;
 }
 

@@ -7,6 +7,7 @@ import { db } from "../lib/firebase";
 import { Plus, Minus, Info, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { translateProducts } from "../lib/translator";
+import { calculateProductUnitPrice, parseExtra } from "../lib/pricing";
 
 export default function MenuSection({ onAddToCart, disabled }: { onAddToCart: (item: CartItem) => void, disabled?: boolean }) {
   const { t, i18n } = useTranslation();
@@ -152,8 +153,17 @@ interface ProductCardProps {
 function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps) {
   const [temp, setTemp] = useState<"Caliente" | "Frío">("Caliente");
   const [essence, setEssence] = useState<string>("");
+  const [essenceQty, setEssenceQty] = useState<number>(1);
   const [milk, setMilk] = useState<string>("");
+  const [milkQty, setMilkQty] = useState<number>(1);
   const { t } = useTranslation();
+
+  const currentUnitPrice = calculateProductUnitPrice(product.price, {
+    milk,
+    milkQty,
+    essence,
+    essenceQty
+  });
 
   return (
     <motion.div
@@ -169,7 +179,7 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
           <p className="text-gray-400 text-xs md:text-sm font-light leading-relaxed font-sans line-clamp-3">{product.description}</p>
         </div>
         <div className="text-right ml-4">
-          <span className="font-extenda font-black text-2xl md:text-3xl text-indigo-brand whitespace-nowrap">Bs {product.price}</span>
+          <span className="font-extenda font-black text-2xl md:text-3xl text-indigo-brand whitespace-nowrap">Bs {currentUnitPrice}</span>
         </div>
       </div>
 
@@ -190,10 +200,42 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
 
         {product.hasMilkOptions && menuOptions.milks.length > 0 && (
           <div className="bg-gray-50 rounded-xl px-3 py-2 mt-2">
-             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">{t("menu.chooseMilk", "Elige tu leche:")}</span>
+             <div className="flex justify-between items-center mb-1">
+               <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400">{t("menu.chooseMilk", "Elige tu leche:")}</span>
+               {milk && (
+                 <div className="flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-lg border border-gray-100 shadow-2xs">
+                   <button 
+                     type="button"
+                     onClick={() => setMilkQty(prev => {
+                       if (prev <= 1) {
+                         setMilk("");
+                         return 1;
+                       }
+                       return prev - 1;
+                     })} 
+                     className="text-gray-400 hover:text-red-500 font-bold text-[10px] w-4 h-4 flex items-center justify-center rounded"
+                     title="Disminuir / Quitar extra"
+                   >
+                     -
+                   </button>
+                   <span className="text-[9px] font-black text-indigo-brand min-w-[12px] text-center">{milkQty}</span>
+                   <button 
+                     type="button"
+                     onClick={() => setMilkQty(prev => prev + 1)} 
+                     className="text-gray-400 hover:text-indigo-brand font-bold text-[10px] w-4 h-4 flex items-center justify-center rounded"
+                     title="Aumentar cantidad de extra"
+                   >
+                     +
+                   </button>
+                 </div>
+               )}
+             </div>
              <select 
                value={milk} 
-               onChange={(e) => setMilk(e.target.value)}
+               onChange={(e) => {
+                 setMilk(e.target.value);
+                 setMilkQty(1);
+               }}
                className="w-full bg-transparent text-[10px] font-bold uppercase tracking-wider text-indigo-brand focus:outline-none cursor-pointer"
              >
                <option value="">{t("menu.select", "Selecciona...")}</option>
@@ -204,10 +246,42 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
 
         {product.hasEssenceOptions && menuOptions.essences.length > 0 && (
           <div className="bg-gray-50 rounded-xl px-3 py-2 mt-2">
-             <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400 mb-1">{t("menu.chooseEssence", "Elige tu esencia:")}</span>
+             <div className="flex justify-between items-center mb-1">
+               <span className="block text-[8px] font-bold uppercase tracking-widest text-gray-400">{t("menu.chooseEssence", "Elige tu esencia:")}</span>
+               {essence && essence !== "Sin Esencia" && (
+                 <div className="flex items-center gap-1.5 bg-white px-2 py-0.5 rounded-lg border border-gray-100 shadow-2xs">
+                   <button 
+                     type="button"
+                     onClick={() => setEssenceQty(prev => {
+                       if (prev <= 1) {
+                         setEssence("");
+                         return 1;
+                       }
+                       return prev - 1;
+                     })} 
+                     className="text-gray-400 hover:text-red-500 font-bold text-[10px] w-4 h-4 flex items-center justify-center rounded"
+                     title="Disminuir / Quitar extra"
+                   >
+                     -
+                   </button>
+                   <span className="text-[9px] font-black text-indigo-brand min-w-[12px] text-center">{essenceQty}</span>
+                   <button 
+                     type="button"
+                     onClick={() => setEssenceQty(prev => prev + 1)} 
+                     className="text-gray-400 hover:text-indigo-brand font-bold text-[10px] w-4 h-4 flex items-center justify-center rounded"
+                     title="Aumentar cantidad de extra"
+                   >
+                     +
+                   </button>
+                 </div>
+               )}
+             </div>
              <select 
                value={essence} 
-               onChange={(e) => setEssence(e.target.value)}
+               onChange={(e) => {
+                 setEssence(e.target.value);
+                 setEssenceQty(1);
+               }}
                className="w-full bg-transparent text-[10px] font-bold uppercase tracking-wider text-indigo-brand focus:outline-none cursor-pointer"
              >
                <option value="">{t("menu.select", "Selecciona...")}</option>
@@ -217,14 +291,21 @@ function ProductCard({ product, onAdd, menuOptions, disabled }: ProductCardProps
         )}
 
         <button
-          onClick={() => onAdd({ 
-            ...product, 
-            uniqueId: Math.random().toString(36), 
-            selectedTemp: product.hasTemperatureOptions ? temp : undefined, 
-            selectedEssence: (product.hasEssenceOptions && essence) ? essence : undefined, 
-            selectedMilk: (product.hasMilkOptions && milk) ? milk : undefined, 
-            finalPrice: product.price 
-          })}
+          onClick={() => {
+            onAdd({ 
+              ...product, 
+              uniqueId: Math.random().toString(36), 
+              selectedTemp: product.hasTemperatureOptions ? temp : undefined, 
+              selectedEssence: (product.hasEssenceOptions && essence && essence !== "Sin Esencia") 
+                ? (essenceQty > 1 ? `${essence} (x${essenceQty})` : essence) 
+                : undefined, 
+              selectedMilk: (product.hasMilkOptions && milk) 
+                ? (milkQty > 1 ? `${milk} (x${milkQty})` : milk) 
+                : undefined, 
+              finalPrice: currentUnitPrice,
+              quantity: 1
+            });
+          }}
           disabled={!product.available || disabled}
           className={`w-full py-3 rounded-xl font-bold text-[10px] md:text-xs tracking-[0.2em] transition-all active:scale-95 flex items-center justify-center gap-2 ${product.available && !disabled ? "bg-indigo-brand text-white hover:bg-orange-brand" : "bg-gray-100 text-gray-300 cursor-not-allowed"}`}
         >
